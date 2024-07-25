@@ -1,0 +1,53 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-indigo-600">
+      <h1 class="text-3xl font-bold text-white">Vera's Anxiety Separation Training</h1>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6">
+      <.form :let={f} for={@new_session} phx-submit="save" class="mb-8 bg-gray-100 p-4 rounded-lg">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <.input field={f[:duration]} type="number" label="Duration (minutes)" />
+          <.input field={f[:success]} type="checkbox" label="Was the session successful?" />
+          <.input field={f[:notes]} type="textarea" label="Notes" class="sm:col-span-2" />
+        </div>
+
+        <.button class="mt-4" type="submit">Add Session</.button>
+      </.form>
+
+      <.table id="sessions" rows={@sessions}>
+        <:col :let={session} label="Date">
+          <%= Calendar.strftime(session.inserted_at, "%Y-%m-%d %H:%M") %>
+        </:col>
+        <:col :let={session} label="Duration">
+          <%= session.duration %> minutes
+        </:col>
+        <:col :let={session} label="Success">
+          <span class={[
+            "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
+            session.success && "bg-green-100 text-green-800",
+            !session.success && "bg-red-100 text-red-800"
+          ]}>
+            <%= if session.success do %>
+              <.icon name="hero-check-circle-mini" class="h-5 w-5 mr-1" />
+              Success
+            <% else %>
+              <.icon name="hero-x-circle-mini" class="h-5 w-5 mr-1" />
+              Not successful
+            <% end %>
+          </span>
+        </:col>
+        <:action :let={session}>
+          <.link patch={~p"/sessions/#{session.id}/edit"} class="text-indigo-600 hover:text-indigo-900">
+            <.icon name="hero-pencil-square-mini" class="h-5 w-5" />
+          </.link>
+        </:action>
+        <:action :let={session}>
+          <.link phx-click="delete" phx-value-id={session.id} data-confirm="Are you sure?" class="text-red-600 hover:text-red-900">
+            <.icon name="hero-trash-mini" class="h-5 w-5" />
+          </.link>
+        </:action>
+      </.table>
+    </div>
+  </div>
+</div>

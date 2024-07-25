@@ -4,7 +4,6 @@ defmodule VeranxietyWeb.ErrorHTML do
 
   See config/config.exs.
   """
-  use VeranxietyWeb, :html
 
   # If you want to customize your error pages,
   # uncomment the embed_templates/1 call below
