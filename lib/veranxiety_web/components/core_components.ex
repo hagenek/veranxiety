@@ -231,7 +231,7 @@ defmodule VeranxietyWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
+        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 dark:hover:bg-surface-2  py-2 px-3",
         "text-sm font-semibold leading-6 text-white active:text-white/80",
         @class
       ]}
@@ -488,14 +488,18 @@ defmodule VeranxietyWeb.CoreComponents do
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
           class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700 dark:text-gray-200"
         >
-          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-zinc-50">
+          <tr
+            :for={row <- @rows}
+            id={@row_id && @row_id.(row)}
+            class="group hover:bg-zinc-50 dark:hover:bg-gray-600"
+          >
             <td
               :for={{col, i} <- Enum.with_index(@col)}
               phx-click={@row_click && @row_click.(row)}
               class={["relative p-0", @row_click && "hover:cursor-pointer"]}
             >
               <div class="block py-2 pr-2">
-                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
+                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 dark:group-hover:bg-gray-600 sm:rounded-l-xl" />
                 <span class={["relative", i == 0 && "font-semibold text-zinc-900 dark:text-gray-50"]}>
                   <%= render_slot(col, @row_item.(row)) %>
                 </span>
@@ -503,10 +507,10 @@ defmodule VeranxietyWeb.CoreComponents do
             </td>
             <td :if={@action != []} class="relative w-14 p-0">
               <div class="relative whitespace-nowrap py-2 text-right text-sm font-medium">
-                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
+                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 dark:group-hover:bg-gray-600 sm:rounded-r-xl" />
                 <span
                   :for={action <- @action}
-                  class="relative ml-2 font-semibold leading-6 text-zinc-900 dark:text-gray-50 hover:text-zinc-700 dark:text-gray-200"
+                  class="relative ml-2 font-semibold leading-6 text-zinc-900 dark:text-gray-50 hover:text-zinc-700 dark:hover:text-gray-200"
                 >
                   <%= render_slot(action, @row_item.(row)) %>
                 </span>
