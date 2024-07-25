@@ -15,19 +15,64 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        base: "var(--bg-primary)",
-        surface: "var(--bg-secondary)",
-        text: "var(--text-primary)",
-        "text-secondary": "var(--text-secondary)",
-        overlay: "var(--color-overlay)",
-        muted: "var(--color-muted)",
-        subtle: "var(--color-subtle)",
-        love: "var(--color-love)",
-        gold: "var(--color-gold)",
-        rose: "var(--color-rose)",
-        pine: "var(--color-pine)",
-        foam: "var(--color-foam)",
-        iris: "var(--color-iris)",
+        // Base colors
+        base: {
+          DEFAULT: "var(--bg-primary)",
+          dark: "var(--base)",
+        },
+        surface: {
+          DEFAULT: "var(--bg-secondary)",
+          dark: "var(--surface0)",
+        },
+        text: {
+          DEFAULT: "var(--text-primary)",
+          dark: "var(--text)",
+          secondary: "var(--text-secondary)",
+        },
+
+        // Catppuccin colors
+        rosewater: "var(--rosewater)",
+        flamingo: "var(--flamingo)",
+        pink: "var(--pink)",
+        mauve: "var(--mauve)",
+        red: "var(--red)",
+        maroon: "var(--maroon)",
+        peach: "var(--peach)",
+        yellow: "var(--yellow)",
+        green: "var(--green)",
+        teal: "var(--teal)",
+        sky: "var(--sky)",
+        sapphire: "var(--sapphire)",
+        blue: "var(--blue)",
+        lavender: "var(--lavender)",
+
+        // Additional Catppuccin shades
+        subtext: {
+          1: "var(--subtext1)",
+          0: "var(--subtext0)",
+        },
+        overlay: {
+          2: "var(--overlay2)",
+          1: "var(--overlay1)",
+          0: "var(--overlay0)",
+        },
+        surface: {
+          2: "var(--surface2)",
+          1: "var(--surface1)",
+          0: "var(--surface0)",
+        },
+        mantle: "var(--mantle)",
+        crust: "var(--crust)",
+
+        // Your custom color mappings
+        muted: "var(--overlay1)",
+        subtle: "var(--overlay0)",
+        love: "var(--red)",
+        gold: "var(--yellow)",
+        rose: "var(--pink)",
+        pine: "var(--green)",
+        foam: "var(--sky)",
+        iris: "var(--mauve)",
       },
     },
   },
