@@ -24,7 +24,7 @@ defmodule VeranxietyWeb.SessionLive.FormComponent do
   end
 
   def handle_event("save", %{"session" => session_params}, socket) do
-    save_session(socket, socket.assigns.action, session_params)
+    save_session(socket, socket.assigns.live_action, session_params)
   end
 
   defp save_session(socket, :edit, session_params) do
@@ -33,7 +33,7 @@ defmodule VeranxietyWeb.SessionLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Session updated successfully")
-         |> push_navigate(to: socket.assigns.return_to)}
+         |> push_navigate(to: ~p"/sessions")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -46,7 +46,7 @@ defmodule VeranxietyWeb.SessionLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Session created successfully")
-         |> push_navigate(to: socket.assigns.return_to)}
+         |> push_navigate(to: ~p"/sessions")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}

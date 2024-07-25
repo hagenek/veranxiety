@@ -1,5 +1,4 @@
 defmodule Veranxiety.Training do
-  import Ecto.Query, warn: false
   alias Veranxiety.Repo
   alias Veranxiety.Training.Session
 
