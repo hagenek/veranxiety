@@ -318,7 +318,7 @@ defmodule VeranxietyWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 dark:text-gray-50 focus:ring-0"
+          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
           {@rest}
         />
         <%= @label %>
@@ -355,7 +355,7 @@ defmodule VeranxietyWeb.CoreComponents do
         id={@id}
         name={@name}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 dark:text-gray-50 focus:ring-0 sm:text-sm sm:leading-6 min-h-[6rem]",
+          "mt-2 block w-full rounded-lg text-zinc-900 dark:bg-gray-700 dark:text-gray-50 focus:ring-0 sm:text-sm sm:leading-6 min-h-[6rem]",
           @errors == [] && "border-zinc-300 focus:border-zinc-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
         ]}
@@ -377,7 +377,7 @@ defmodule VeranxietyWeb.CoreComponents do
         id={@id}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 dark:text-gray-50 focus:ring-0 sm:text-sm sm:leading-6",
+          "mt-2 block w-full rounded-lg text-zinc-900 dark:bg-gray-700  dark:text-gray-50 focus:ring-0 sm:text-sm sm:leading-6",
           @errors == [] && "border-zinc-300 focus:border-zinc-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
         ]}
@@ -473,11 +473,11 @@ defmodule VeranxietyWeb.CoreComponents do
       end
 
     ~H"""
-    <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-      <table class="w-[40rem] mt-11 sm:w-full">
+    <div class="overflow-x-auto px-4 sm:overflow-visible sm:px-0">
+      <table class="w-full mt-11">
         <thead class="text-sm text-left leading-6 text-zinc-500 dark:text-gray-500">
           <tr>
-            <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal"><%= col[:label] %></th>
+            <th :for={col <- @col} class="p-0 pb-4 pr-2 font-normal"><%= col[:label] %></th>
             <th :if={@action != []} class="relative p-0 pb-4">
               <span class="sr-only"><%= gettext("Actions") %></span>
             </th>
@@ -494,7 +494,7 @@ defmodule VeranxietyWeb.CoreComponents do
               phx-click={@row_click && @row_click.(row)}
               class={["relative p-0", @row_click && "hover:cursor-pointer"]}
             >
-              <div class="block py-4 pr-6">
+              <div class="block py-2 pr-2">
                 <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
                 <span class={["relative", i == 0 && "font-semibold text-zinc-900 dark:text-gray-50"]}>
                   <%= render_slot(col, @row_item.(row)) %>
@@ -502,11 +502,11 @@ defmodule VeranxietyWeb.CoreComponents do
               </div>
             </td>
             <td :if={@action != []} class="relative w-14 p-0">
-              <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              <div class="relative whitespace-nowrap py-2 text-right text-sm font-medium">
                 <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
                 <span
                   :for={action <- @action}
-                  class="relative ml-4 font-semibold leading-6 text-zinc-900 dark:text-gray-50 hover:text-zinc-700 dark:text-gray-200"
+                  class="relative ml-2 font-semibold leading-6 text-zinc-900 dark:text-gray-50 hover:text-zinc-700 dark:text-gray-200"
                 >
                   <%= render_slot(action, @row_item.(row)) %>
                 </span>
@@ -672,5 +672,44 @@ defmodule VeranxietyWeb.CoreComponents do
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+  @doc """
+  Renders a button.
+
+  ## Examples
+
+      <.button>Send!</.button>
+      <.button phx-click="go" class="ml-2">Send!</.button>
+
+  ## Attributes
+
+    * `type` - the type of the button (default: "button")
+    * `class` - additional CSS classes to apply to the button
+    * `rest` - any additional HTML attributes to apply to the button
+
+  """
+  attr :type, :string, default: "button"
+  attr :class, :string, default: nil
+  attr :rest, :global, include: ~w(disabled form name value)
+
+  slot :inner_block, required: true
+
+  def primary_button(assigns) do
+    ~H"""
+    <button
+      type={@type}
+      class={[
+        "transition-colors duration-200 font-medium rounded-lg px-5 py-2.5 text-sm",
+        "light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900",
+        "light:border-2 light:border-pink-300 light:hover:border-pink-400",
+        "dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
   end
 end
