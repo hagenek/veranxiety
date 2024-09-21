@@ -1,12 +1,14 @@
 defmodule Veranxiety.Training do
+  import Ecto.Query, warn: false
   alias Veranxiety.Repo
   alias Veranxiety.Training.Session
 
   def list_sessions do
-    Repo.all(Session)
+    Session
+    |> order_by([s], desc: s.inserted_at)
+    |> Repo.all()
   end
 
-  @spec get_session!(any()) :: any()
   def get_session!(id), do: Repo.get!(Session, id)
 
   def create_session(attrs \\ %{}) do

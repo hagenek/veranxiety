@@ -12,6 +12,20 @@ defmodule VeranxietyWeb.SessionLive.Index do
      |> assign(:changeset, Training.change_session(%Session{}))}
   end
 
+  def get_duration_minutes(changeset) do
+    case Ecto.Changeset.get_field(changeset, :duration) do
+      nil -> ""
+      duration -> div(duration, 60)
+    end
+  end
+
+  def get_duration_seconds(changeset) do
+    case Ecto.Changeset.get_field(changeset, :duration) do
+      nil -> ""
+      duration -> rem(duration, 60)
+    end
+  end
+
   @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
@@ -37,15 +51,13 @@ defmodule VeranxietyWeb.SessionLive.Index do
 
   @impl true
   def handle_event("save", %{"session" => session_params}, socket) do
-    session_params = convert_duration(session_params)
-
-    case Training.create_session(session_params) do
+    case create_or_update_session(socket, session_params) do
       {:ok, _session} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Session created successfully")
-         |> assign(:sessions, list_sessions())
-         |> assign(:changeset, Training.change_session(%Session{}))}
+         |> put_flash(:info, "Session saved successfully")
+         |> push_navigate(to: ~p"/sessions")
+         |> assign(:sessions, list_sessions())}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -79,12 +91,33 @@ defmodule VeranxietyWeb.SessionLive.Index do
     Training.list_sessions()
   end
 
+  defp create_or_update_session(socket, session_params) do
+    session_params = convert_duration(session_params)
+
+    case socket.assigns.live_action do
+      :edit ->
+        Training.update_session(socket.assigns.session, session_params)
+
+      :new ->
+        Training.create_session(session_params)
+    end
+  end
+
   defp convert_duration(params) do
-    minutes = String.to_integer(params["duration_minutes"] || "0")
-    seconds = String.to_integer(params["duration_seconds"] || "0")
+    minutes = parse_integer(params["duration_minutes"])
+    seconds = parse_integer(params["duration_seconds"])
     total_seconds = minutes * 60 + seconds
     Map.put(params, "duration", total_seconds)
   end
+
+  defp parse_integer(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {int, _} -> int
+      :error -> 0
+    end
+  end
+
+  defp parse_integer(_), do: 0
 
   def format_duration(duration) when is_integer(duration) do
     minutes = div(duration, 60)
