@@ -17,8 +17,9 @@ defmodule VeranxietyWeb.Router do
   scope "/", VeranxietyWeb do
     pipe_through :browser
 
-    live "/", SessionLive.Index, :new
+    get "/", PageController, :home
     live "/sessions", SessionLive.Index, :index
+    live "/sessions/new", SessionLive.Index, :new
     live "/sessions/:id/edit", SessionLive.Index, :edit
     live "/sessions/:id", SessionLive.Show, :show
   end

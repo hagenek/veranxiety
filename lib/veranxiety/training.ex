@@ -6,6 +6,7 @@ defmodule Veranxiety.Training do
     Repo.all(Session)
   end
 
+  @spec get_session!(any()) :: any()
   def get_session!(id), do: Repo.get!(Session, id)
 
   def create_session(attrs \\ %{}) do

@@ -1,5 +1,6 @@
 defmodule VeranxietyWeb.Layouts do
   use VeranxietyWeb, :html
+
   embed_templates "layouts/*"
 
   def app(assigns) do
@@ -8,6 +9,9 @@ defmodule VeranxietyWeb.Layouts do
       <header class="flex-none bg-surface dark:bg-surface-dark shadow z-10">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 class="text-2xl font-bold text-text dark:text-text-dark">Veranxiety</h1>
+          <nav>
+            <.nav_links />
+          </nav>
           <button
             id="dark-mode-toggle"
             class="text-gray-500 p-2 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -30,10 +34,13 @@ defmodule VeranxietyWeb.Layouts do
         </div>
       </header>
       <main class="flex-1 overflow-y-auto">
-        <div class="max-w-7xl mx-auto text-center py-6 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <%= @inner_content %>
         </div>
       </main>
+      <footer class="bg-surface dark:bg-surface-dark py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>&copy; <%= DateTime.utc_now().year %> Veranxiety. All rights reserved.</p>
+      </footer>
     </div>
     """
   end

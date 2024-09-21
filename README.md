@@ -9,6 +9,11 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
+## TODOs
+
+- [ ] Make sure the app works as expected and that navigation is possible
+  - [ ] Add a link to the homepage
+
 ## Learn more
 
   * Official website: https://www.phoenixframework.org/
