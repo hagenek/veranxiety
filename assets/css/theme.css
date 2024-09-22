@@ -6,6 +6,7 @@
     --pink: #f5c2e7;
     --mauve: #cba6f7;
     --red: #f38ba8;
+    --dark-red: #e64553;
     --maroon: #eba0ac;
     --peach: #fab387;
     --yellow: #f9e2af;
@@ -28,32 +29,31 @@
     --mantle: #181825;
     --crust: #11111b;
   }
-  
+
   :root:not(.dark) {
     --bg-primary: #ffffff;
     --bg-secondary: #f3f4f6;
     --text-primary: #111827;
     --text-secondary: #4b5563;
   }
-  
+
   .dark {
     --bg-primary: var(--base);
     --bg-secondary: var(--surface0);
     --text-primary: var(--text);
     --text-secondary: var(--subtext1);
   }
-  
+
   .light {
     --bg-primary: #ffffff;
     --bg-secondary: #f3f4f6;
     --text-primary: #111827;
     --text-secondary: #4b5563;
   }
- 
 
-  
+
+
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
   }
-  

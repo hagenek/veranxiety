@@ -1,0 +1,2450 @@
+// File: ./veranxiety/training/session.ex
+
+defmodule Veranxiety.Training.Session do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "sessions" do
+    field :duration, :integer
+    field :success, :boolean, default: false
+    field :notes, :string
+
+    timestamps()
+  end
+
+  @doc false
+  def changeset(session, attrs) do
+    session
+    |> cast(attrs, [:duration, :success, :notes])
+    |> validate_required([:duration, :success])
+    |> validate_number(:duration, greater_than_or_equal_to: 0)
+  end
+end
+
+// File: ./veranxiety/allergy/entry.ex
+
+defmodule Veranxiety.Allergy.Entry do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "allergy_entries" do
+    field :date, :date
+    field :itch_score, :integer
+    field :symptoms, :string
+    field :notes, :string
+
+    timestamps(type: :utc_datetime)
+  end
+
+  @doc false
+  def changeset(entry, attrs) do
+    entry
+    |> cast(attrs, [:date, :itch_score, :symptoms, :notes])
+    |> validate_required([:date, :itch_score])
+    |> validate_number(:itch_score, greater_than_or_equal_to: 0, less_than_or_equal_to: 4)
+  end
+end
+
+// File: ./veranxiety/allergy.ex
+
+defmodule Veranxiety.Allergy do
+  @moduledoc """
+  The Allergy context.
+  """
+
+  import Ecto.Query, warn: false
+  alias Veranxiety.Repo
+
+  alias Veranxiety.Allergy.Entry
+
+  @doc """
+  Returns the list of allergy_entries.
+
+  ## Examples
+
+      iex> list_allergy_entries()
+      [%Entry{}, ...]
+
+  """
+  def list_allergy_entries do
+    Repo.all(Entry)
+  end
+
+  @doc """
+  Gets a single entry.
+
+  Raises `Ecto.NoResultsError` if the Entry does not exist.
+
+  ## Examples
+
+      iex> get_entry!(123)
+      %Entry{}
+
+      iex> get_entry!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_entry!(id), do: Repo.get!(Entry, id)
+
+  @doc """
+  Creates a entry.
+
+  ## Examples
+
+      iex> create_entry(%{field: value})
+      {:ok, %Entry{}}
+
+      iex> create_entry(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_entry(attrs \\ %{}) do
+    %Entry{}
+    |> Entry.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a entry.
+
+  ## Examples
+
+      iex> update_entry(entry, %{field: new_value})
+      {:ok, %Entry{}}
+
+      iex> update_entry(entry, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_entry(%Entry{} = entry, attrs) do
+    entry
+    |> Entry.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a entry.
+
+  ## Examples
+
+      iex> delete_entry(entry)
+      {:ok, %Entry{}}
+
+      iex> delete_entry(entry)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_entry(%Entry{} = entry) do
+    Repo.delete(entry)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking entry changes.
+
+  ## Examples
+
+      iex> change_entry(entry)
+      %Ecto.Changeset{data: %Entry{}}
+
+  """
+  def change_entry(%Entry{} = entry, attrs \\ %{}) do
+    Entry.changeset(entry, attrs)
+  end
+end
+
+// File: ./veranxiety/release.ex
+
+defmodule Veranxiety.Release do
+  @moduledoc """
+  Used for executing DB release tasks when run in production without Mix
+  installed.
+  """
+  @app :veranxiety
+
+  def migrate do
+    load_app()
+
+    for repo <- repos() do
+      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
+    end
+  end
+
+  def rollback(repo, version) do
+    load_app()
+    {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
+  end
+
+  defp repos do
+    Application.fetch_env!(@app, :ecto_repos)
+  end
+
+  defp load_app do
+    Application.load(@app)
+  end
+end
+
+// File: ./veranxiety/mailer.ex
+
+defmodule Veranxiety.Mailer do
+  use Swoosh.Mailer, otp_app: :veranxiety
+end
+
+// File: ./veranxiety/training.ex
+
+defmodule Veranxiety.Training do
+  import Ecto.Query, warn: false
+  alias Veranxiety.Repo
+  alias Veranxiety.Training.Session
+
+  def list_sessions do
+    Session
+    |> order_by([s], desc: s.inserted_at)
+    |> Repo.all()
+  end
+
+  def get_session!(id), do: Repo.get!(Session, id)
+
+  def create_session(attrs \\ %{}) do
+    %Session{}
+    |> Session.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_session(%Session{} = session, attrs) do
+    session
+    |> Session.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_session(%Session{} = session) do
+    Repo.delete(session)
+  end
+
+  def change_session(%Session{} = session, attrs \\ %{}) do
+    Session.changeset(session, attrs)
+  end
+end
+
+// File: ./veranxiety/application.ex
+
+defmodule Veranxiety.Application do
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Applications
+  @moduledoc false
+
+  use Application
+
+  @impl true
+  def start(_type, _args) do
+    children = [
+      VeranxietyWeb.Telemetry,
+      Veranxiety.Repo,
+      {DNSCluster, query: Application.get_env(:veranxiety, :dns_cluster_query) || :ignore},
+      {Phoenix.PubSub, name: Veranxiety.PubSub},
+      # Start the Finch HTTP client for sending emails
+      {Finch, name: Veranxiety.Finch},
+      # Start a worker by calling: Veranxiety.Worker.start_link(arg)
+      # {Veranxiety.Worker, arg},
+      # Start to serve requests, typically the last entry
+      VeranxietyWeb.Endpoint
+    ]
+
+    # See https://hexdocs.pm/elixir/Supervisor.html
+    # for other strategies and supported options
+    opts = [strategy: :one_for_one, name: Veranxiety.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+
+  # Tell Phoenix to update the endpoint configuration
+  # whenever the application is updated.
+  @impl true
+  def config_change(changed, _new, removed) do
+    VeranxietyWeb.Endpoint.config_change(changed, removed)
+    :ok
+  end
+end
+
+// File: ./veranxiety/repo.ex
+
+defmodule Veranxiety.Repo do
+  use Ecto.Repo,
+    otp_app: :veranxiety,
+    adapter: Ecto.Adapters.Postgres
+end
+
+// File: ./veranxiety_web.ex
+
+defmodule VeranxietyWeb do
+  @moduledoc """
+  The entrypoint for defining your web interface, such
+  as controllers, views, channels and so on.
+
+  This can be used in your application as:
+
+      use VeranxietyWeb, :controller
+      use VeranxietyWeb, :view
+
+  The definitions below will be executed for every view,
+  controller, etc, so keep them short and clean, focused
+  on imports, uses and aliases.
+
+  Do NOT define functions inside the quoted expressions
+  below. Instead, define any helper function in modules
+  and import those modules here.
+  """
+
+  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+
+  def router do
+    quote do
+      use Phoenix.Router, helpers: false
+
+      # Import common connection and controller functions to use in pipelines
+      import Plug.Conn
+      import Phoenix.Controller
+      import Phoenix.LiveView.Router
+    end
+  end
+
+  def channel do
+    quote do
+      use Phoenix.Channel
+    end
+  end
+
+  def controller do
+    quote do
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: VeranxietyWeb.Layouts]
+
+      import Plug.Conn
+      import VeranxietyWeb.Gettext
+
+      unquote(verified_routes())
+    end
+  end
+
+  def live_view do
+    quote do
+      use Phoenix.LiveView,
+        layout: {VeranxietyWeb.Layouts, :app}
+
+      unquote(html_helpers())
+    end
+  end
+
+  def live_component do
+    quote do
+      use Phoenix.LiveComponent
+
+      unquote(html_helpers())
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
+      # Include general helpers for rendering HTML
+      unquote(html_helpers())
+    end
+  end
+
+  defp html_helpers do
+    quote do
+      # HTML escaping functionality
+      import Phoenix.HTML
+      # Core UI components and translation
+      import VeranxietyWeb.CoreComponents
+      import VeranxietyWeb.Gettext
+
+      # Shortcut for generating JS commands
+      alias Phoenix.LiveView.JS
+
+      # Import custom components
+      import VeranxietyWeb.Components.NavLinks
+
+      # Routes generation with the ~p sigil
+      unquote(verified_routes())
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: VeranxietyWeb.Endpoint,
+        router: VeranxietyWeb.Router,
+        statics: VeranxietyWeb.static_paths()
+    end
+  end
+
+  @doc """
+  When used, dispatch to the appropriate controller/view/etc.
+  """
+  defmacro __using__(which) when is_atom(which) do
+    apply(__MODULE__, which, [])
+  end
+end
+
+// File: ./veranxiety_web/telemetry.ex
+
+defmodule VeranxietyWeb.Telemetry do
+  use Supervisor
+  import Telemetry.Metrics
+
+  def start_link(arg) do
+    Supervisor.start_link(__MODULE__, arg, name: __MODULE__)
+  end
+
+  @impl true
+  def init(_arg) do
+    children = [
+      # Telemetry poller will execute the given period measurements
+      # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
+      {:telemetry_poller, measurements: periodic_measurements(), period: 10_000}
+      # Add reporters as children of your supervision tree.
+      # {Telemetry.Metrics.ConsoleReporter, metrics: metrics()}
+    ]
+
+    Supervisor.init(children, strategy: :one_for_one)
+  end
+
+  def metrics do
+    [
+      # Phoenix Metrics
+      summary("phoenix.endpoint.start.system_time",
+        unit: {:native, :millisecond}
+      ),
+      summary("phoenix.endpoint.stop.duration",
+        unit: {:native, :millisecond}
+      ),
+      summary("phoenix.router_dispatch.start.system_time",
+        tags: [:route],
+        unit: {:native, :millisecond}
+      ),
+      summary("phoenix.router_dispatch.exception.duration",
+        tags: [:route],
+        unit: {:native, :millisecond}
+      ),
+      summary("phoenix.router_dispatch.stop.duration",
+        tags: [:route],
+        unit: {:native, :millisecond}
+      ),
+      summary("phoenix.socket_connected.duration",
+        unit: {:native, :millisecond}
+      ),
+      summary("phoenix.channel_joined.duration",
+        unit: {:native, :millisecond}
+      ),
+      summary("phoenix.channel_handled_in.duration",
+        tags: [:event],
+        unit: {:native, :millisecond}
+      ),
+
+      # Database Metrics
+      summary("veranxiety.repo.query.total_time",
+        unit: {:native, :millisecond},
+        description: "The sum of the other measurements"
+      ),
+      summary("veranxiety.repo.query.decode_time",
+        unit: {:native, :millisecond},
+        description: "The time spent decoding the data received from the database"
+      ),
+      summary("veranxiety.repo.query.query_time",
+        unit: {:native, :millisecond},
+        description: "The time spent executing the query"
+      ),
+      summary("veranxiety.repo.query.queue_time",
+        unit: {:native, :millisecond},
+        description: "The time spent waiting for a database connection"
+      ),
+      summary("veranxiety.repo.query.idle_time",
+        unit: {:native, :millisecond},
+        description:
+          "The time the connection spent waiting before being checked out for the query"
+      ),
+
+      # VM Metrics
+      summary("vm.memory.total", unit: {:byte, :kilobyte}),
+      summary("vm.total_run_queue_lengths.total"),
+      summary("vm.total_run_queue_lengths.cpu"),
+      summary("vm.total_run_queue_lengths.io")
+    ]
+  end
+
+  defp periodic_measurements do
+    [
+      # A module, function and arguments to be invoked periodically.
+      # This function must call :telemetry.execute/3 and a metric must be added above.
+      # {VeranxietyWeb, :count_users, []}
+    ]
+  end
+end
+
+// File: ./veranxiety_web/gettext.ex
+
+defmodule VeranxietyWeb.Gettext do
+  @moduledoc """
+  A module providing Internationalization with a gettext-based API.
+
+  By using [Gettext](https://hexdocs.pm/gettext),
+  your module gains a set of macros for translations, for example:
+
+      import VeranxietyWeb.Gettext
+
+      # Simple translation
+      gettext("Here is the string to translate")
+
+      # Plural translation
+      ngettext("Here is the string to translate",
+               "Here are the strings to translate",
+               3)
+
+      # Domain-based translation
+      dgettext("errors", "Here is the error message to translate")
+
+  See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
+  """
+  use Gettext, otp_app: :veranxiety
+end
+
+// File: ./veranxiety_web/router.ex
+
+defmodule VeranxietyWeb.Router do
+  use VeranxietyWeb, :router
+
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {VeranxietyWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
+  pipeline :api do
+    plug :accepts, ["json"]
+  end
+
+  scope "/", VeranxietyWeb do
+    pipe_through :browser
+
+    get "/", PageController, :home
+    live "/sessions", SessionLive.Index, :index
+    live "/sessions/new", SessionLive.Index, :new
+    live "/sessions/:id/edit", SessionLive.Index, :edit
+    live "/sessions/:id", SessionLive.Show, :show
+
+    # New routes for the allergy diary
+    live "/allergy_entries", AllergyEntryLive, :index
+    live "/allergy_entries/new", AllergyEntryLive, :new
+    live "/allergy_entries/:id/edit", AllergyEntryLive, :edit
+  end
+
+  # Other scopes may use custom stacks.
+  # scope "/api", VeranxietyWeb do
+  #   pipe_through :api
+  # end
+
+  # Enable LiveDashboard and Swoosh mailbox preview in development
+  if Application.compile_env(:veranxiety, :dev_routes) do
+    # If you want to use the LiveDashboard in production, you should put
+    # it behind authentication and allow only admins to access it.
+    # If your application does not have an admins-only section yet,
+    # you can use Plug.BasicAuth to set up some basic authentication
+    # as long as you are also using SSL (which you should anyway).
+    import Phoenix.LiveDashboard.Router
+
+    scope "/dev" do
+      pipe_through :browser
+
+      live_dashboard "/dashboard", metrics: VeranxietyWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
+end
+
+// File: ./veranxiety_web/components/core_components.ex
+
+defmodule VeranxietyWeb.CoreComponents do
+  @moduledoc """
+  Provides core UI components.
+
+  At first glance, this module may seem daunting, but its goal is to provide
+  core building blocks for your application, such as modals, tables, and
+  forms. The components consist mostly of markup and are well-documented
+  with doc strings and declarative assigns. You may customize and style
+  them in any way you want, based on your application growth and needs.
+
+  The default components use Tailwind CSS, a utility-first CSS framework.
+  See the [Tailwind CSS documentation](https://tailwindcss.com) to learn
+  how to customize them or feel free to swap in another framework altogether.
+
+  Icons are provided by [heroicons](https://heroicons.com). See `icon/1` for usage.
+  """
+  use Phoenix.Component
+
+  alias Phoenix.LiveView.JS
+  import VeranxietyWeb.Gettext
+
+  @doc """
+  Renders a modal.
+
+  ## Examples
+
+      <.modal id="confirm-modal">
+        This is a modal.
+      </.modal>
+
+  JS commands may be passed to the `:on_cancel` to configure
+  the closing/cancel event, for example:
+
+      <.modal id="confirm" on_cancel={JS.navigate(~p"/posts")}>
+        This is another modal.
+      </.modal>
+
+  """
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :on_cancel, JS, default: %JS{}
+  slot :inner_block, required: true
+
+  def modal(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-mounted={@show && show_modal(@id)}
+      phx-remove={hide_modal(@id)}
+      data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      class="relative z-50 hidden"
+    >
+      <div id={"#{@id}-bg"} class="bg-zinc-50/90 fixed inset-0 transition-opacity" aria-hidden="true" />
+      <div
+        class="fixed inset-0 overflow-y-auto"
+        aria-labelledby={"#{@id}-title"}
+        aria-describedby={"#{@id}-description"}
+        role="dialog"
+        aria-modal="true"
+        tabindex="0"
+      >
+        <div class="flex min-h-full items-center justify-center">
+          <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8">
+            <.focus_wrap
+              id={"#{@id}-container"}
+              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+              phx-key="escape"
+              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-14 shadow-lg ring-1 transition"
+            >
+              <div class="absolute top-6 right-5">
+                <button
+                  phx-click={JS.exec("data-cancel", to: "##{@id}")}
+                  type="button"
+                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
+                  aria-label={gettext("close")}
+                >
+                  <.icon name="hero-x-mark-solid" class="h-5 w-5" />
+                </button>
+              </div>
+              <div id={"#{@id}-content"}>
+                <%= render_slot(@inner_block) %>
+              </div>
+            </.focus_wrap>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders flash notices.
+
+  ## Examples
+
+      <.flash kind={:info} flash={@flash} />
+      <.flash kind={:info} phx-mounted={show("#flash")}>Welcome Back!</.flash>
+  """
+  attr :id, :string, doc: "the optional id of flash container"
+  attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
+  attr :title, :string, default: nil
+  attr :kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup"
+  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
+
+  slot :inner_block, doc: "the optional inner block that renders the flash message"
+
+  def flash(assigns) do
+    assigns = assign_new(assigns, :id, fn -> "flash-#{assigns.kind}" end)
+
+    ~H"""
+    <div
+      :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
+      id={@id}
+      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+      role="alert"
+      class={[
+        "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
+        @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900",
+        @kind == :error && "bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
+      ]}
+      {@rest}
+    >
+      <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
+        <.icon :if={@kind == :info} name="hero-information-circle-mini" class="h-4 w-4" />
+        <.icon :if={@kind == :error} name="hero-exclamation-circle-mini" class="h-4 w-4" />
+        <%= @title %>
+      </p>
+      <p class="mt-2 text-sm leading-5"><%= msg %></p>
+      <button type="button" class="group absolute top-1 right-1 p-2" aria-label={gettext("close")}>
+        <.icon name="hero-x-mark-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+      </button>
+    </div>
+    """
+  end
+
+  @doc """
+  Shows the flash group with standard titles and content.
+
+  ## Examples
+
+      <.flash_group flash={@flash} />
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+  attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
+
+  def flash_group(assigns) do
+    ~H"""
+    <div id={@id}>
+      <.flash kind={:info} title={gettext("Success!")} flash={@flash} />
+      <.flash kind={:error} title={gettext("Error!")} flash={@flash} />
+      <.flash
+        id="client-error"
+        kind={:error}
+        title={gettext("We can't find the internet")}
+        phx-disconnected={show(".phx-client-error #client-error")}
+        phx-connected={hide("#client-error")}
+        hidden
+      >
+        <%= gettext("Attempting to reconnect") %>
+        <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
+      </.flash>
+
+      <.flash
+        id="server-error"
+        kind={:error}
+        title={gettext("Something went wrong!")}
+        phx-disconnected={show(".phx-server-error #server-error")}
+        phx-connected={hide("#server-error")}
+        hidden
+      >
+        <%= gettext("Hang in there while we get back on track") %>
+        <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
+      </.flash>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a simple form.
+
+  ## Examples
+
+      <.simple_form for={@form} phx-change="validate" phx-submit="save">
+        <.input field={@form[:email]} label="Email"/>
+        <.input field={@form[:username]} label="Username" />
+        <:actions>
+          <.button>Save</.button>
+        </:actions>
+      </.simple_form>
+  """
+  attr :for, :any, required: true, doc: "the data structure for the form"
+  attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
+
+  attr :rest, :global,
+    include: ~w(autocomplete name rel action enctype method novalidate target multipart),
+    doc: "the arbitrary HTML attributes to apply to the form tag"
+
+  slot :inner_block, required: true
+  slot :actions, doc: "the slot for form actions, such as a submit button"
+
+  def simple_form(assigns) do
+    ~H"""
+    <.form :let={f} for={@for} as={@as} {@rest}>
+      <div class="mt-10 space-y-8 bg-white">
+        <%= render_slot(@inner_block, f) %>
+        <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
+          <%= render_slot(action, f) %>
+        </div>
+      </div>
+    </.form>
+    """
+  end
+
+  @doc """
+  Renders a button.
+
+  ## Examples
+
+      <.button>Send!</.button>
+      <.button phx-click="go" class="ml-2">Send!</.button>
+  """
+  attr :type, :string, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global, include: ~w(disabled form name value)
+
+  slot :inner_block, required: true
+
+  def button(assigns) do
+    ~H"""
+    <button
+      type={@type}
+      class={[
+        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 dark:hover:bg-surface-2  py-2 px-3",
+        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
+
+  @doc """
+  Renders an input with label and error messages.
+
+  A `Phoenix.HTML.FormField` may be passed as argument,
+  which is used to retrieve the input name, id, and values.
+  Otherwise all attributes may be passed explicitly.
+
+  ## Types
+
+  This function accepts all HTML input types, considering that:
+
+    * You may also set `type="select"` to render a `<select>` tag
+
+    * `type="checkbox"` is used exclusively to render boolean values
+
+    * For live file uploads, see `Phoenix.Component.live_file_input/1`
+
+  See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+  for more information. Unsupported types, such as hidden and radio,
+  are best written directly in your templates.
+
+  ## Examples
+
+      <.input field={@form[:email]} type="email" />
+      <.input name="my-input" errors={["oh no!"]} />
+  """
+  attr :id, :any, default: nil
+  attr :name, :any
+  attr :label, :string, default: nil
+  attr :value, :any
+
+  attr :type, :string,
+    default: "text",
+    values: ~w(checkbox color date datetime-local email file month number password
+               range search select tel text textarea time url week)
+
+  attr :field, Phoenix.HTML.FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :errors, :list, default: []
+  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
+  attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
+  attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
+  attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+
+  attr :rest, :global,
+    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+                multiple pattern placeholder readonly required rows size step)
+
+  def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
+    errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
+
+    assigns
+    |> assign(field: nil, id: assigns.id || field.id)
+    |> assign(:errors, Enum.map(errors, &translate_error(&1)))
+    |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
+    |> assign_new(:value, fn -> field.value end)
+    |> input()
+  end
+
+  def input(%{type: "checkbox"} = assigns) do
+    assigns =
+      assign_new(assigns, :checked, fn ->
+        Phoenix.HTML.Form.normalize_value("checkbox", assigns[:value])
+      end)
+
+    ~H"""
+    <div>
+      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
+        <input type="hidden" name={@name} value="false" disabled={@rest[:disabled]} />
+        <input
+          type="checkbox"
+          id={@id}
+          name={@name}
+          value="true"
+          checked={@checked}
+          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
+          {@rest}
+        />
+        <%= @label %>
+      </label>
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  def input(%{type: "select"} = assigns) do
+    ~H"""
+    <div>
+      <.label for={@id}><%= @label %></.label>
+      <select
+        id={@id}
+        name={@name}
+        class="mt-2 block w-full rounded-md border dark:bg-base dark:text-sky border-gray-300 bg-white shadow-sm focus:border-zinc-400 focus:ring-0 sm:text-sm"
+        multiple={@multiple}
+        {@rest}
+      >
+        <option :if={@prompt} value=""><%= @prompt %></option>
+        <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
+      </select>
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  def input(%{type: "textarea"} = assigns) do
+    ~H"""
+    <div>
+      <.label class="dark:text-peach" for={@id}><%= @label %></.label>
+      <textarea
+        id={@id}
+        name={@name}
+        class={[
+          "mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-sky focus:ring-0 sm:text-sm sm:leading-6 min-h-[6rem]",
+          @errors == [] && "border-zinc-300 focus:border-zinc-400",
+          @errors != [] && "border-rose-400 focus:border-rose-400"
+        ]}
+        {@rest}
+      ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  # All other inputs text, datetime-local, url, password, etc. are handled here...
+  def input(assigns) do
+    ~H"""
+    <div>
+      <.label for={@id}><%= @label %></.label>
+      <input
+        type={@type}
+        name={@name}
+        id={@id}
+        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+        class={[
+          "mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-sky focus:ring-0 sm:text-sm sm:leading-6",
+          @errors == [] && "border-zinc-300 focus:border-zinc-400",
+          @errors != [] && "border-rose-400 focus:border-rose-400"
+        ]}
+        {@rest}
+      />
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a label.
+  """
+  attr :for, :string, default: nil
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def label(assigns) do
+    ~H"""
+    <label
+      for={@for}
+      class={[
+        "block text-sm font-semibold leading-6 text-zinc-800 dark:text-gray-100",
+        @class
+      ]}
+    >
+      <%= render_slot(@inner_block) %>
+    </label>
+    """
+  end
+
+  @doc """
+  Generates a generic error message.
+  """
+  slot :inner_block, required: true
+
+  def error(assigns) do
+    ~H"""
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
+      <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
+      <%= render_slot(@inner_block) %>
+    </p>
+    """
+  end
+
+  @doc """
+  Renders a header with title.
+  """
+  attr :class, :string, default: nil
+
+  slot :inner_block, required: true
+  slot :subtitle
+  slot :actions
+
+  def header(assigns) do
+    ~H"""
+    <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
+      <div>
+        <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-gray-100">
+          <%= render_slot(@inner_block) %>
+        </h1>
+        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+          <%= render_slot(@subtitle) %>
+        </p>
+      </div>
+      <div class="flex-none"><%= render_slot(@actions) %></div>
+    </header>
+    """
+  end
+
+  @doc ~S"""
+  Renders a table with generic styling.
+
+  ## Examples
+
+      <.table id="users" rows={@users}>
+        <:col :let={user} label="id"><%= user.id %></:col>
+        <:col :let={user} label="username"><%= user.username %></:col>
+      </.table>
+  """
+  attr :id, :string, required: true
+  attr :rows, :list, required: true
+  attr :row_id, :any, default: nil, doc: "the function for generating the row id"
+  attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+
+  attr :row_item, :any,
+    default: &Function.identity/1,
+    doc: "the function for mapping each row before calling the :col and :action slots"
+
+  slot :col, required: true do
+    attr :label, :string
+  end
+
+  slot :action, doc: "the slot for showing user actions in the last table column"
+
+  def table(assigns) do
+    assigns =
+      with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
+        assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)
+      end
+
+    ~H"""
+    <div class="overflow-x-auto px-4 sm:overflow-visible sm:px-0">
+      <table class="w-full mt-11">
+        <thead class="text-sm text-left leading-6 text-zinc-500 dark:text-gray-500">
+          <tr>
+            <th :for={col <- @col} class="p-0 pb-4 pr-2 font-normal"><%= col[:label] %></th>
+            <th :if={@action != []} class="relative p-0 pb-4">
+              <span class="sr-only"><%= gettext("Actions") %></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          id={@id}
+          phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
+          class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700 dark:text-gray-200"
+        >
+          <tr
+            :for={row <- @rows}
+            id={@row_id && @row_id.(row)}
+            class="group hover:bg-zinc-50 dark:hover:bg-gray-600"
+          >
+            <td
+              :for={{col, i} <- Enum.with_index(@col)}
+              phx-click={@row_click && @row_click.(row)}
+              class={["relative p-0", @row_click && "hover:cursor-pointer"]}
+            >
+              <div class="block py-2 pr-2">
+                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 dark:group-hover:bg-gray-600 sm:rounded-l-xl" />
+                <span class={["relative", i == 0 && "font-semibold text-zinc-900 dark:text-gray-50"]}>
+                  <%= render_slot(col, @row_item.(row)) %>
+                </span>
+              </div>
+            </td>
+            <td :if={@action != []} class="relative w-14 p-0">
+              <div class="relative whitespace-nowrap py-2 text-right text-sm font-medium">
+                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 dark:group-hover:bg-gray-600 sm:rounded-r-xl" />
+                <span
+                  :for={action <- @action}
+                  class="relative ml-2 font-semibold leading-6 text-zinc-900 dark:text-gray-50 hover:text-zinc-700 dark:hover:text-gray-200"
+                >
+                  <%= render_slot(action, @row_item.(row)) %>
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a data list.
+
+  ## Examples
+
+      <.list>
+        <:item title="Title"><%= @post.title %></:item>
+        <:item title="Views"><%= @post.views %></:item>
+      </.list>
+  """
+  slot :item, required: true do
+    attr :title, :string, required: true
+  end
+
+  def list(assigns) do
+    ~H"""
+    <div class="mt-14">
+      <dl class="-my-4 divide-y divide-zinc-100">
+        <div :for={item <- @item} class="flex gap-4 py-4 text-sm leading-6 sm:gap-8">
+          <dt class="w-1/4 flex-none text-zinc-500 dark:text-gray-500"><%= item.title %></dt>
+          <dd class="text-zinc-700 dark:text-gray-200"><%= render_slot(item) %></dd>
+        </div>
+      </dl>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a back navigation link.
+
+  ## Examples
+
+      <.back navigate={~p"/posts"}>Back to posts</.back>
+  """
+  attr :navigate, :any, required: true
+  slot :inner_block, required: true
+
+  def back(assigns) do
+    ~H"""
+    <div class="mt-16">
+      <.link
+        navigate={@navigate}
+        class="text-sm font-semibold leading-6 text-zinc-900 dark:text-gray-50 hover:text-zinc-700 dark:text-gray-200"
+      >
+        <.icon name="hero-arrow-left-solid" class="h-3 w-3" />
+        <%= render_slot(@inner_block) %>
+      </.link>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a [Heroicon](https://heroicons.com).
+
+  Heroicons come in three styles – outline, solid, and mini.
+  By default, the outline style is used, but solid and mini may
+  be applied by using the `-solid` and `-mini` suffix.
+
+  You can customize the size and colors of the icons by setting
+  width, height, and background color classes.
+
+  Icons are extracted from the `deps/heroicons` directory and bundled within
+  your compiled app.css by the plugin in your `assets/tailwind.config.js`.
+
+  ## Examples
+
+      <.icon name="hero-x-mark-solid" />
+      <.icon name="hero-arrow-path" class="ml-1 w-3 h-3 animate-spin" />
+  """
+  attr :name, :string, required: true
+  attr :class, :string, default: nil
+
+  def icon(%{name: "hero-" <> _} = assigns) do
+    ~H"""
+    <span class={[@name, @class]} />
+    """
+  end
+
+  ## JS Commands
+
+  def show(js \\ %JS{}, selector) do
+    JS.show(js,
+      to: selector,
+      time: 300,
+      transition:
+        {"transition-all transform ease-out duration-300",
+         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+         "opacity-100 translate-y-0 sm:scale-100"}
+    )
+  end
+
+  def hide(js \\ %JS{}, selector) do
+    JS.hide(js,
+      to: selector,
+      time: 200,
+      transition:
+        {"transition-all transform ease-in duration-200",
+         "opacity-100 translate-y-0 sm:scale-100",
+         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
+    )
+  end
+
+  def show_modal(js \\ %JS{}, id) when is_binary(id) do
+    js
+    |> JS.show(to: "##{id}")
+    |> JS.show(
+      to: "##{id}-bg",
+      time: 300,
+      transition: {"transition-all transform ease-out duration-300", "opacity-0", "opacity-100"}
+    )
+    |> show("##{id}-container")
+    |> JS.add_class("overflow-hidden", to: "body")
+    |> JS.focus_first(to: "##{id}-content")
+  end
+
+  def hide_modal(js \\ %JS{}, id) do
+    js
+    |> JS.hide(
+      to: "##{id}-bg",
+      transition: {"transition-all transform ease-in duration-200", "opacity-100", "opacity-0"}
+    )
+    |> hide("##{id}-container")
+    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> JS.remove_class("overflow-hidden", to: "body")
+    |> JS.pop_focus()
+  end
+
+  @doc """
+  Translates an error message using gettext.
+  """
+  def translate_error({msg, opts}) do
+    # When using gettext, we typically pass the strings we want
+    # to translate as a static argument:
+    #
+    #     # Translate the number of files with plural rules
+    #     dngettext("errors", "1 file", "%{count} files", count)
+    #
+    # However the error messages in our forms and APIs are generated
+    # dynamically, so we need to translate them by calling Gettext
+    # with our gettext backend as first argument. Translations are
+    # available in the errors.po file (as we use the "errors" domain).
+    if count = opts[:count] do
+      Gettext.dngettext(VeranxietyWeb.Gettext, "errors", msg, msg, count, opts)
+    else
+      Gettext.dgettext(VeranxietyWeb.Gettext, "errors", msg, opts)
+    end
+  end
+
+  @doc """
+  Translates the errors for a field from a keyword list of errors.
+  """
+  def translate_errors(errors, field) when is_list(errors) do
+    for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+  @doc """
+  Renders a button.
+
+  ## Examples
+
+      <.button>Send!</.button>
+      <.button phx-click="go" class="ml-2">Send!</.button>
+
+  ## Attributes
+
+    * `type` - the type of the button (default: "button")
+    * `class` - additional CSS classes to apply to the button
+    * `rest` - any additional HTML attributes to apply to the button
+
+  """
+  attr :type, :string, default: "button"
+  attr :class, :string, default: nil
+  attr :rest, :global, include: ~w(disabled form name value)
+
+  slot :inner_block, required: true
+
+  def primary_button(assigns) do
+    ~H"""
+    <button
+      type={@type}
+      class={[
+        "transition-colors duration-200 font-medium rounded-lg px-5 py-2.5 text-sm",
+        "light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900",
+        "light:border-2 light:border-pink-300 light:hover:border-pink-400",
+        "dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
+end
+
+// File: ./veranxiety_web/components/nav_links.ex
+
+defmodule VeranxietyWeb.Components.NavLinks do
+  use Phoenix.Component
+  use VeranxietyWeb, :verified_routes
+
+  def nav_links(assigns) do
+    ~H"""
+    <ul class="flex space-x-4">
+      <li>
+        <.link
+          navigate={~p"/"}
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+        >
+          Home
+        </.link>
+      </li>
+      <li>
+        <.link
+          navigate={~p"/sessions"}
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+        >
+          Sessions
+        </.link>
+      </li>
+      <li>
+        <.link
+          navigate={~p"/sessions/new"}
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+        >
+          New Session
+        </.link>
+      </li>
+      <li>
+        <.link
+          navigate={~p"/allergy_entries"}
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+        >
+          Allergies
+        </.link>
+      </li>
+    </ul>
+    """
+  end
+end
+
+// File: ./veranxiety_web/components/layouts.ex
+
+defmodule VeranxietyWeb.Layouts do
+  use VeranxietyWeb, :html
+
+  embed_templates "layouts/*"
+
+  def app(assigns) do
+    ~H"""
+    <div class="flex flex-col h-screen overflow-hidden dark:text-rose bg-base dark:bg-base-dark">
+      <header class="flex-none bg-surface dark:bg-surface-dark shadow z-10">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 class="text-2xl font-bold text-text dark:text-text-dark">Veranxiety</h1>
+          <nav>
+            <.nav_links />
+          </nav>
+          <button
+            id="dark-mode-toggle"
+            class="text-gray-500 p-2 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <main class="flex-1 overflow-y-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <%= @inner_content %>
+        </div>
+      </main>
+      <footer class="bg-surface dark:bg-surface-dark py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>&copy; <%= DateTime.utc_now().year %> Veranxiety. All rights reserved.</p>
+      </footer>
+    </div>
+    """
+  end
+end
+
+// File: ./veranxiety_web/components/layouts/root.html.heex
+
+<%!-- ./root.html.heex --%> <!DOCTYPE html>
+<html lang="en" class="[scrollbar-gutter:stable]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title suffix=" · ">
+      <%= "Veranxiety" %>
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+  </head>
+
+  <body class="bg-base text-text antialiased">
+        <%= @inner_content %>
+  </body>
+</html>
+
+// File: ./veranxiety_web/live/allergy_entry_live/index.ex
+
+defmodule VeranxietyWeb.AllergyEntryLive do
+  use VeranxietyWeb, :live_view
+  alias Veranxiety.Allergy
+  alias Veranxiety.Allergy.Entry
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok, assign(socket, entries: list_entries(), itch_score: nil, symptoms: [])}
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    entry = Allergy.get_entry!(id)
+    {:ok, _} = Allergy.delete_entry(entry)
+    {:noreply, assign(socket, :entries, list_entries())}
+  end
+
+  @impl true
+  def handle_event("validate", %{"entry" => entry_params}, socket) do
+    changeset =
+      socket.assigns.entry
+      |> Allergy.change_entry(entry_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  @impl true
+  def handle_event("save", %{"entry" => entry_params}, socket) do
+    updated_params =
+      Map.merge(entry_params, %{
+        "itch_score" => socket.assigns.itch_score,
+        "symptoms" => Enum.join(socket.assigns.symptoms, ", ")
+      })
+
+    save_entry(socket, socket.assigns.live_action, updated_params)
+  end
+
+  defp format_date(date) do
+    Calendar.strftime(date, "%a %d. %B %Y")
+  end
+
+  @impl true
+  def handle_event("set_itch_score", %{"score" => score}, socket) do
+    {:noreply, assign(socket, :itch_score, String.to_integer(score))}
+  end
+
+  @impl true
+  def handle_event("toggle_symptom", %{"symptom" => symptom}, socket) do
+    updated_symptoms =
+      if symptom in socket.assigns.symptoms do
+        List.delete(socket.assigns.symptoms, symptom)
+      else
+        [symptom | socket.assigns.symptoms]
+      end
+
+    {:noreply, assign(socket, :symptoms, updated_symptoms)}
+  end
+
+  defp apply_action(socket, :edit, %{"id" => id}) do
+    entry = Allergy.get_entry!(id)
+
+    socket
+    |> assign(:page_title, "Edit Allergy Entry")
+    |> assign(:entry, entry)
+    |> assign(:changeset, Allergy.change_entry(entry))
+  end
+
+  defp apply_action(socket, :new, _params) do
+    today = Date.utc_today()
+    entry = %Entry{date: today}
+
+    socket
+    |> assign(:page_title, "New Allergy Entry")
+    |> assign(:entry, entry)
+    |> assign(:changeset, Allergy.change_entry(entry))
+  end
+
+  defp apply_action(socket, :index, _params) do
+    socket
+    |> assign(:page_title, "Allergy Entries")
+    |> assign(:entry, nil)
+    |> assign(:changeset, nil)
+  end
+
+  defp save_entry(socket, :edit, entry_params) do
+    case Allergy.update_entry(socket.assigns.entry, entry_params) do
+      {:ok, _entry} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Allergy entry updated successfully")
+         |> push_navigate(to: ~p"/allergy_entries")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
+  end
+
+  defp save_entry(socket, :new, entry_params) do
+    case Allergy.create_entry(entry_params) do
+      {:ok, _entry} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Allergy entry created successfully")
+         |> push_navigate(to: ~p"/allergy_entries")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
+  defp list_entries do
+    Allergy.list_allergy_entries()
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div class="max-w-7xl mx-auto px-0 sm:px-4 lg:px-8">
+      <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
+        <%= if @live_action in [:new, :edit] do %>
+          <div class="px-4 py-5 sm:p-6">
+            <.form
+              :let={f}
+              for={@changeset}
+              phx-submit="save"
+              phx-change="validate"
+              class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md space-y-6"
+            >
+              <div>
+                <.input
+                  field={f[:date]}
+                  type="date"
+                  label="Date (required)"
+                  value={Phoenix.HTML.Form.input_value(f, :date)}
+                  class="mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-sky focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-lavender mb-2">
+                  Itch Score (required)
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                  <%= for {score, label} <- [{0, "never"}, {1, "rarely"}, {2, "sometimes"}, {3, "often"}, {4, "excessively"}] do %>
+                    <button
+                      type="button"
+                      phx-click="set_itch_score"
+                      phx-value-score={score}
+                      class={"w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 ease-in-out #{
+                    if @itch_score == score do
+                      "bg-mauve text-base dark:bg-blue dark:text-crust"
+                    else
+                      "bg-surface0 text-text hover:bg-surface1 dark:bg-surface1 dark:text-lavender dark:hover:bg-surface2"
+                    end
+                  } border border-surface1 dark:border-surface2"}
+                    >
+                      <span class="capitalize"><%= label %> (<%= score %>)</span>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Symptoms (optional)
+                </label>
+                <div class="space-y-3">
+                  <%= for symptom <- ["Scratching", "Licking paws", "Ear inflammation", "Skin redness"] do %>
+                    <div class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={symptom}
+                        name="symptoms[]"
+                        value={symptom}
+                        checked={symptom in @symptoms}
+                        phx-click="toggle_symptom"
+                        phx-value-symptom={symptom}
+                        class="w-6 h-6 text-blue bg-surface0 border-surface1 rounded focus:ring-blue"
+                      />
+                      <label for={symptom} class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                        <%= symptom %>
+                      </label>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+
+              <div>
+                <.input
+                  field={f[:notes]}
+                  type="textarea"
+                  label="Additional Notes (optional)"
+                  rows="4"
+                  class="mt-1 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-sky focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
+                />
+              </div>
+
+              <div class="mt-6 flex justify-end">
+                <.button type="submit" class="w-full bg-blue text-base hover:bg-sapphire">
+                  <%= if @live_action == :new, do: "Add Entry", else: "Update Entry" %>
+                </.button>
+              </div>
+            </.form>
+          </div>
+        <% else %>
+          <div class="px-4 py-5 sm:p-6">
+            <div class="mb-6 flex justify-between items-center">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Allergy Entries</h3>
+              <.link patch={~p"/allergy_entries/new"}>
+                <.button>New Entry</.button>
+              </.link>
+            </div>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <%= for entry <- @entries do %>
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-4">
+                  <div class="flex-col justify-between items-center">
+                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <%= format_date(entry.date) %>
+                    </div>
+                    <div class={itch_score_classes(entry.itch_score)}>
+                      Itch Score: <%= entry.itch_score %>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-300">
+                    <strong>Symptoms:</strong> <%= entry.symptoms || "None reported" %>
+                  </p>
+                  <%= if entry.notes && entry.notes != "" do %>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                      <strong>Notes:</strong> <%= entry.notes %>
+                    </p>
+                  <% end %>
+                  <div class="flex justify-end space-x-2">
+                    <.link
+                      patch={~p"/allergy_entries/#{entry.id}/edit"}
+                      class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                      <.icon name="hero-pencil-square-mini" class="h-7 w-7" />
+                    </.link>
+                    <.link
+                      phx-click="delete"
+                      phx-value-id={entry.id}
+                      data-confirm="Are you sure you want to delete this entry?"
+                      class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                    >
+                      <.icon name="hero-trash-mini" class="h-7 w-7" />
+                    </.link>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  defp itch_score_classes(score) do
+    base_classes = "mt-2 px-3 py-1 w-fit text-xs font-semibold rounded-full"
+
+    score_specific_classes =
+      case score do
+        0 -> "bg-green text-crust dark:bg-green dark:text-base"
+        1 -> "bg-yellow text-crust dark:bg-yellow dark:text-base"
+        2 -> "bg-peach text-crust dark:bg-peach dark:text-base"
+        3 -> "bg-red text-crust dark:bg-maroon dark:text-base"
+        4 -> "bg-mauve text-crust dark:bg-red dark:text-base"
+        _ -> "bg-surface0 text-text dark:bg-surface1 dark:text-text"
+      end
+
+    "#{base_classes} #{score_specific_classes}"
+  end
+end
+
+// File: ./veranxiety_web/live/allergy_entry_live/form_component.ex
+
+defmodule VeranxietyWeb.AllergyEntryLive.FormComponent do
+  use VeranxietyWeb, :live_component
+
+  alias Veranxiety.Allergy
+
+  @impl true
+  def update(%{entry: entry} = assigns, socket) do
+    changeset = Allergy.change_entry(entry)
+    today = Date.utc_today()
+
+    changeset = Ecto.Changeset.put_change(changeset, :date, today)
+
+    IO.inspect(changeset, label: "Changeset after update")
+    IO.inspect(Ecto.Changeset.get_field(changeset, :date), label: "Date field value")
+
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(:changeset, changeset)}
+  end
+
+  @impl true
+  def handle_event("validate", %{"entry" => entry_params}, socket) do
+    changeset =
+      socket.assigns.entry
+      |> Allergy.change_entry(entry_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  def handle_event("save", %{"entry" => entry_params}, socket) do
+    save_entry(socket, socket.assigns.action, entry_params)
+  end
+
+  defp save_entry(socket, :edit, entry_params) do
+    case Allergy.update_entry(socket.assigns.entry, entry_params) do
+      {:ok, _entry} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Allergy entry updated successfully")
+         |> push_navigate(to: ~p"/allergy_entries")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
+  end
+
+  defp save_entry(socket, :new, entry_params) do
+    case Allergy.create_entry(entry_params) do
+      {:ok, _entry} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Allergy entry created successfully")
+         |> push_navigate(to: ~p"/allergy_entries")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
+  end
+end
+
+// File: ./veranxiety_web/live/session_live/index.html.heex
+
+<div class="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+  <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
+    <div class="px-4 py-0 sm:px-6 bg-surface dark:bg-surface-dark">
+      <h2 class="text-2xl font-serif font-semibold text-gray-900 dark:text-gray-100">
+        <%= @page_title %>
+      </h2>
+    </div>
+
+    <%= if @live_action in [:new, :edit] do %>
+      <div class="px-4 py-5 sm:p-6">
+        <.form
+          :let={f}
+          for={@changeset}
+          phx-submit="save"
+          phx-change="validate"
+          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <.input
+                field={f[:duration_minutes]}
+                type="number"
+                label="Duration (minutes)"
+                class="text-gray-900 dark:text-gray-100"
+              />
+              <.input
+                field={f[:duration_seconds]}
+                type="number"
+                label="Seconds"
+                min="0"
+                max="59"
+                class="text-gray-900 dark:text-gray-100"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Session Result
+              </label>
+              <div class="flex items-center space-x-4">
+                <label class="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="session[success]"
+                    value="true"
+                    class="form-radio text-indigo-600 dark:text-indigo-400"
+                    checked={@changeset.changes[:success] == true}
+                  />
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">Successful</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="session[success]"
+                    value="false"
+                    class="form-radio text-indigo-600 dark:text-indigo-400"
+                    checked={@changeset.changes[:success] == false}
+                  />
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">Not successful</span>
+                </label>
+              </div>
+            </div>
+            <div class="sm:col-span-2 lg:col-span-3">
+              <.input
+                field={f[:notes]}
+                type="textarea"
+                label="Notes"
+                rows="4"
+                class="text-gray-900 dark:text-gray-100"
+              />
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <.primary_button
+              type="submit"
+              class="transition-colors duration-200
+               light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
+               light:border-2 light:border-pink-300 light:hover:border-pink-400
+               dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
+               font-medium rounded-lg px-5 py-2.5 text-sm"
+            >
+              <%= if @live_action == :new, do: "Add Session", else: "Update Session" %>
+            </.primary_button>
+          </div>
+        </.form>
+      </div>
+    <% else %>
+      <div class="px-4 py-0 sm:p-0">
+        <div class="mb-2 flex justify-between items-center">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Session List</h3>
+          <.link patch={~p"/sessions/new"}>
+            <.primary_button>
+              New Session
+            </.primary_button>
+          </.link>
+          <img
+            src={~p"/images/vera_sitting.jpg"}
+            alt="Vera"
+            class="w-full max-w-md mx-auto rounded-lg shadow-lg mb-6"
+          />
+        </div>
+
+        <.table id="sessions" rows={@sessions}>
+          <:col :let={session} label="Date">
+            <%= Calendar.strftime(session.inserted_at, "%Y-%m-%d") %>
+          </:col>
+          <:col :let={session} label="Duration">
+            <%= format_duration(session.duration) %>
+          </:col>
+          <:col :let={session} label="Success">
+            <span class={[
+              "px-2 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full",
+              session.success &&
+                "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
+              !session.success && "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+            ]}>
+              <%= if session.success do %>
+                <.icon name="hero-check-circle-mini" class="h-4 w-4 mr-1" /> Success
+              <% else %>
+                <.icon name="hero-x-circle-mini" class="h-4 w-4 mr-1" /> Not successful
+              <% end %>
+            </span>
+          </:col>
+          <:action :let={session}>
+            <div class="flex items-center space-x-2">
+              <.link
+                patch={~p"/sessions/#{session.id}/edit"}
+                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                <.icon name="hero-pencil-square-mini" class="h-5 w-5" />
+              </.link>
+              <.link
+                phx-click="delete"
+                phx-value-id={session.id}
+                data-confirm="Are you sure you want to delete this session?"
+                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+              >
+                <.icon name="hero-trash-mini" class="h-5 w-5" />
+              </.link>
+            </div>
+          </:action>
+        </.table>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+// File: ./veranxiety_web/live/session_live/show.ex
+
+defmodule VeranxietyWeb.SessionLive.Show do
+  use VeranxietyWeb, :live_view
+  use VeranxietyWeb, :html
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(%{"id" => id}, _, socket) do
+    {:noreply,
+     socket
+     |> assign(:page_title, page_title(socket.assigns.live_action))
+     |> assign(:session, Veranxiety.Training.get_session!(id))}
+  end
+
+  defp page_title(:show), do: "Show Session"
+  defp page_title(:edit), do: "Edit Session"
+end
+
+// File: ./veranxiety_web/live/session_live/index.ex
+
+defmodule VeranxietyWeb.SessionLive.Index do
+  use VeranxietyWeb, :live_view
+
+  alias Veranxiety.Training
+  alias Veranxiety.Training.Session
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok,
+     socket
+     |> assign(:sessions, list_sessions())
+     |> assign(:changeset, Training.change_session(%Session{}))}
+  end
+
+  def get_duration_minutes(changeset) do
+    case Ecto.Changeset.get_field(changeset, :duration) do
+      nil -> ""
+      duration -> div(duration, 60)
+    end
+  end
+
+  def get_duration_seconds(changeset) do
+    case Ecto.Changeset.get_field(changeset, :duration) do
+      nil -> ""
+      duration -> rem(duration, 60)
+    end
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  @impl true
+  def handle_event("validate", %{"session" => session_params}, socket) do
+    changeset =
+      %Session{}
+      |> Training.change_session(session_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    session = Training.get_session!(id)
+    {:ok, _} = Training.delete_session(session)
+
+    {:noreply, assign(socket, :sessions, list_sessions())}
+  end
+
+  @impl true
+  def handle_event("save", %{"session" => session_params}, socket) do
+    case create_or_update_session(socket, session_params) do
+      {:ok, _session} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Session saved successfully")
+         |> push_navigate(to: ~p"/sessions")
+         |> assign(:sessions, list_sessions())}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
+  end
+
+  defp apply_action(socket, :edit, %{"id" => id}) do
+    session = Training.get_session!(id)
+
+    socket
+    |> assign(:page_title, "Edit Session")
+    |> assign(:session, session)
+    |> assign(:changeset, Training.change_session(session))
+  end
+
+  defp apply_action(socket, :new, _params) do
+    socket
+    |> assign(:page_title, "New Session")
+    |> assign(:session, %Session{})
+    |> assign(:changeset, Training.change_session(%Session{}))
+  end
+
+  defp apply_action(socket, :index, _params) do
+    socket
+    |> assign(:page_title, "Listing Sessions")
+    |> assign(:session, nil)
+    |> assign(:changeset, Training.change_session(%Session{}))
+  end
+
+  defp list_sessions do
+    Training.list_sessions()
+  end
+
+  defp create_or_update_session(socket, session_params) do
+    session_params = convert_duration(session_params)
+
+    case socket.assigns.live_action do
+      :edit ->
+        Training.update_session(socket.assigns.session, session_params)
+
+      :new ->
+        Training.create_session(session_params)
+    end
+  end
+
+  defp convert_duration(params) do
+    minutes = parse_integer(params["duration_minutes"])
+    seconds = parse_integer(params["duration_seconds"])
+    total_seconds = minutes * 60 + seconds
+    Map.put(params, "duration", total_seconds)
+  end
+
+  defp parse_integer(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {int, _} -> int
+      :error -> 0
+    end
+  end
+
+  defp parse_integer(_), do: 0
+
+  def format_duration(duration) when is_integer(duration) do
+    minutes = div(duration, 60)
+    seconds = rem(duration, 60)
+    "#{minutes} min #{seconds} sec"
+  end
+end
+
+// File: ./veranxiety_web/live/session_live/show.html.heex
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-indigo-600">
+      <h1 class="text-3xl font-bold text-white">Veranxiety</h1>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6">
+      <.form :let={f} for={@changeset} phx-submit="save" class="mb-8 bg-gray-100 p-4 rounded-lg">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <.input field={f[:duration]} type="number" label="Duration (minutes)" />
+          <.input field={f[:success]} type="checkbox" label="Was the session successful?" />
+          <.input field={f[:notes]} type="textarea" label="Notes" class="sm:col-span-2" />
+        </div>
+
+        <.button class="mt-4" type="submit">Add Session</.button>
+      </.form>
+
+      <.table id="sessions" rows={@sessions}>
+        <:col :let={session} label="Date">
+          <%= Calendar.strftime(session.inserted_at, "%Y-%m-%d %H:%M") %>
+        </:col>
+        <:col :let={session} label="Duration">
+          <%= session.duration %> minutes
+        </:col>
+        <:col :let={session} label="Success">
+          <span class={[
+            "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
+            session.success && "bg-green-100 text-green-800",
+            !session.success && "bg-red-100 text-red-800"
+          ]}>
+            <%= if session.success, do: "Success", else: "Not successful" %>
+          </span>
+        </:col>
+        <:action :let={session}>
+          <.link patch={~p"/sessions/#{session.id}/edit"} class="text-indigo-600 hover:text-indigo-900">
+            Edit
+          </.link>
+        </:action>
+        <:action :let={session}>
+          <.link phx-click="delete" phx-value-id={session.id} data-confirm="Are you sure?" class="text-red-600 hover:text-red-900">
+            Delete
+          </.link>
+        </:action>
+      </.table>
+    </div>
+  </div>
+</div>
+// File: ./veranxiety_web/live/session_live/form_component.ex
+
+defmodule VeranxietyWeb.SessionLive.FormComponent do
+  use VeranxietyWeb, :live_component
+
+  alias Veranxiety.Training
+
+  @impl true
+  def update(%{session: session} = assigns, socket) do
+    changeset = Training.change_session(session)
+
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(:changeset, changeset)}
+  end
+
+  @impl true
+  def handle_event("validate", %{"session" => session_params}, socket) do
+    changeset =
+      socket.assigns.session
+      |> Training.change_session(session_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  def handle_event("save", %{"session" => session_params}, socket) do
+    save_session(socket, socket.assigns.live_action, session_params)
+  end
+
+  defp save_session(socket, :edit, session_params) do
+    case Training.update_session(socket.assigns.session, session_params) do
+      {:ok, _session} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Session updated successfully")
+         |> push_navigate(to: ~p"/sessions")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, :changeset, changeset)}
+    end
+  end
+
+  defp save_session(socket, :new, session_params) do
+    case Training.create_session(session_params) do
+      {:ok, _session} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Session created successfully")
+         |> push_navigate(to: ~p"/sessions")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+end
+
+// File: ./veranxiety_web/endpoint.ex
+
+defmodule VeranxietyWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :veranxiety
+
+  # The session will be stored in the cookie and signed,
+  # this means its contents can be read but not tampered with.
+  # Set :encryption_salt if you would also like to encrypt it.
+  @session_options [
+    store: :cookie,
+    key: "_veranxiety_key",
+    signing_salt: "EJRsBhoJ",
+    same_site: "Lax"
+  ]
+
+  socket "/live", Phoenix.LiveView.Socket,
+    websocket: [connect_info: [session: @session_options]],
+    longpoll: [connect_info: [session: @session_options]]
+
+  # Serve at "/" the static files from "priv/static" directory.
+  #
+  # You should set gzip to true if you are running phx.digest
+  # when deploying your static files in production.
+  plug Plug.Static,
+    at: "/",
+    from: :veranxiety,
+    gzip: false,
+    only: VeranxietyWeb.static_paths()
+
+  # Code reloading can be explicitly enabled under the
+  # :code_reloader configuration of your endpoint.
+  if code_reloading? do
+    socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
+    plug Phoenix.LiveReloader
+    plug Phoenix.CodeReloader
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :veranxiety
+  end
+
+  plug Phoenix.LiveDashboard.RequestLogger,
+    param_key: "request_logger",
+    cookie_key: "request_logger"
+
+  plug Plug.RequestId
+  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+
+  plug Plug.Parsers,
+    parsers: [:urlencoded, :multipart, :json],
+    pass: ["*/*"],
+    json_decoder: Phoenix.json_library()
+
+  plug Plug.MethodOverride
+  plug Plug.Head
+  plug Plug.Session, @session_options
+  plug VeranxietyWeb.Router
+end
+
+// File: ./veranxiety_web/controllers/error_json.ex
+
+defmodule VeranxietyWeb.ErrorJSON do
+  @moduledoc """
+  This module is invoked by your endpoint in case of errors on JSON requests.
+
+  See config/config.exs.
+  """
+
+  # If you want to customize a particular status code,
+  # you may add your own clauses, such as:
+  #
+  # def render("500.json", _assigns) do
+  #   %{errors: %{detail: "Internal Server Error"}}
+  # end
+
+  # By default, Phoenix returns the status message from
+  # the template name. For example, "404.json" becomes
+  # "Not Found".
+  def render(template, _assigns) do
+    %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
+  end
+end
+
+// File: ./veranxiety_web/controllers/page_html/home.html.heex
+
+<div class="flex flex-col min-h-screen bg-background">
+  <header class="px-4 lg:px-6 h-14 flex items-center">
+    <a class="flex items-center justify-center" href="#">
+      <span class="sr-only">Veranxiety</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 256 256"
+        class="h-6 w-6"
+        fill="currentColor"
+      >
+        <rect width="256" height="256" fill="none"></rect>
+        <path
+          d="M240,88V200a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V168H32a8,8,0,0,1,0-16H64V120H32a8,8,0,0,1,0-16H64V88A16,16,0,0,1,80,72H224A16,16,0,0,1,240,88Z"
+          opacity="0.2"
+        >
+        </path>
+        <path d="M240,88V200a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V168H32a8,8,0,0,1,0-16H64V120H32a8,8,0,0,1,0-16H64V88A16,16,0,0,1,80,72H224A16,16,0,0,1,240,88ZM80,88V200H224V88Z">
+        </path>
+      </svg>
+      <span class="ml-2 text-xl font-semibold">Veranxiety</span>
+    </a>
+    <nav class="ml-auto flex gap-4 sm:gap-6">
+      <a class="text-sm font-medium hover:underline underline-offset-4" href="#features">
+        Features
+      </a>
+      <a class="text-sm font-medium hover:underline underline-offset-4" href="#">
+        About
+      </a>
+      <a class="text-sm font-medium hover:underline underline-offset-4" href="#">
+        Contact
+      </a>
+    </nav>
+  </header>
+  <main class="flex-1">
+    <section class="w-full py-12 md:py-24 lg:py-32">
+      <div class="container px-4 md:px-6">
+        <div class="flex flex-col items-center space-y-4 text-center">
+          <div class="space-y-2">
+            <h1 class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+              Welcome to Veranxiety
+            </h1>
+            <p class="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+              Your Canine Companion's Health Hub - Manage separation anxiety and track allergies with ease.
+            </p>
+          </div>
+          <div class="space-x-4">
+            <.link navigate={~p"/sessions"}>
+              <.button>Get Started</.button>
+            </.link>
+            <.link href="#features">
+              <.button variant="outline">Learn More</.button>
+            </.link>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="features" class="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
+      <div class="container px-4 md:px-6">
+        <div class="grid gap-10 sm:grid-cols-2">
+          <div class="space-y-4">
+            <div class="inline-block rounded-lg bg-gray-100 p-2 dark:bg-gray-800">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-6 w-6"
+              >
+                <path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"></path>
+                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                <circle cx="12" cy="10" r="2"></circle>
+                <line x1="8" x2="8" y1="2" y2="4"></line>
+                <line x1="16" x2="16" y1="2" y2="4"></line>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold">Separation Anxiety Training</h3>
+            <p class="text-gray-500 dark:text-gray-400">
+              Track and manage your dog's separation anxiety training sessions. Monitor progress and get insights to help your furry friend feel more comfortable when alone.
+            </p>
+            <.link navigate={~p"/sessions"}>
+              <.button variant="link">Start Training</.button>
+            </.link>
+          </div>
+          <div class="space-y-4">
+            <div class="inline-block rounded-lg bg-gray-100 p-2 dark:bg-gray-800">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-6 w-6"
+              >
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                <path d="M8 7h6"></path>
+                <path d="M8 11h8"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold">Allergy Diary</h3>
+            <p class="text-gray-500 dark:text-gray-400">
+              Keep a detailed log of your dog's allergy symptoms, triggers, and treatments. Identify patterns and work with your vet to provide the best care for your allergic pup.
+            </p>
+            <.button variant="link" disabled>Coming Soon</.button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+    <p class="text-xs text-gray-500 dark:text-gray-400">
+      © 2024 Veranxiety. All rights reserved.
+    </p>
+    <nav class="sm:ml-auto flex gap-4 sm:gap-6">
+      <a class="text-xs hover:underline underline-offset-4" href="#">
+        Terms of Service
+      </a>
+      <a class="text-xs hover:underline underline-offset-4" href="#">
+        Privacy
+      </a>
+    </nav>
+  </footer>
+</div>
+
+// File: ./veranxiety_web/controllers/error_html.ex
+
+defmodule VeranxietyWeb.ErrorHTML do
+  @moduledoc """
+  This module is invoked by your endpoint in case of errors on HTML requests.
+
+  See config/config.exs.
+  """
+
+  # If you want to customize your error pages,
+  # uncomment the embed_templates/1 call below
+  # and add pages to the error directory:
+  #
+  #   * lib/veranxiety_web/controllers/error_html/404.html.heex
+  #   * lib/veranxiety_web/controllers/error_html/500.html.heex
+  #
+  # embed_templates "error_html/*"
+
+  # The default is to render a plain text page based on
+  # the template name. For example, "404.html" becomes
+  # "Not Found".
+  def render(template, _assigns) do
+    Phoenix.Controller.status_message_from_template(template)
+  end
+end
+
+// File: ./veranxiety_web/controllers/page_html.ex
+
+defmodule VeranxietyWeb.PageHTML do
+  @moduledoc """
+  This module contains pages rendered by PageController.
+
+  See the `page_html` directory for all templates available.
+  """
+  use VeranxietyWeb, :html
+
+  embed_templates "page_html/*"
+end
+
+// File: ./veranxiety_web/controllers/page_controller.ex
+
+defmodule VeranxietyWeb.PageController do
+  use VeranxietyWeb, :controller
+
+  def home(conn, _params) do
+    # The home page is often custom made,
+    # so skip the default app layout.
+    render(conn, :home, layout: false)
+  end
+end
+
+// File: ./veranxiety.ex
+
+defmodule Veranxiety do
+  @moduledoc """
+  Veranxiety keeps the contexts that define your domain
+  and business logic.
+
+  Contexts are also responsible for managing your data, regardless
+  if it comes from the database, an external API or others.
+  """
+end
+

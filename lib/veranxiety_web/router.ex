@@ -22,6 +22,11 @@ defmodule VeranxietyWeb.Router do
     live "/sessions/new", SessionLive.Index, :new
     live "/sessions/:id/edit", SessionLive.Index, :edit
     live "/sessions/:id", SessionLive.Show, :show
+
+    # New routes for the allergy diary
+    live "/allergy_entries", AllergyEntryLive, :index
+    live "/allergy_entries/new", AllergyEntryLive, :new
+    live "/allergy_entries/:id/edit", AllergyEntryLive, :edit
   end
 
   # Other scopes may use custom stacks.

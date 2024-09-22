@@ -29,6 +29,14 @@ defmodule VeranxietyWeb.Components.NavLinks do
           New Session
         </.link>
       </li>
+      <li>
+        <.link
+          navigate={~p"/allergy_entries"}
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+        >
+          Allergies
+        </.link>
+      </li>
     </ul>
     """
   end

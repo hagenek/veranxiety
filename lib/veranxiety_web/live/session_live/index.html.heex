@@ -1,6 +1,6 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
   <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
-    <div class="px-4 py-5 sm:px-6 bg-surface dark:bg-surface-dark">
+    <div class="px-4 py-0 sm:px-6 bg-surface dark:bg-surface-dark">
       <h2 class="text-2xl font-serif font-semibold text-gray-900 dark:text-gray-100">
         <%= @page_title %>
       </h2>
@@ -8,12 +8,6 @@
 
     <%= if @live_action in [:new, :edit] do %>
       <div class="px-4 py-5 sm:p-6">
-        <img
-          src={~p"/images/vera_sitting.jpg"}
-          alt="Vera"
-          class="w-full max-w-md mx-auto rounded-lg shadow-lg mb-6"
-        />
-
         <.form
           :let={f}
           for={@changeset}
@@ -91,14 +85,19 @@
         </.form>
       </div>
     <% else %>
-      <div class="px-4 py-5 sm:p-6">
-        <div class="mb-6 flex justify-between items-center">
+      <div class="px-4 py-0 sm:p-0">
+        <div class="mb-2 flex justify-between items-center">
           <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Session List</h3>
           <.link patch={~p"/sessions/new"}>
             <.primary_button>
               New Session
             </.primary_button>
           </.link>
+          <img
+            src={~p"/images/vera_sitting.jpg"}
+            alt="Vera"
+            class="w-full max-w-md mx-auto rounded-lg shadow-lg mb-6"
+          />
         </div>
 
         <.table id="sessions" rows={@sessions}>
