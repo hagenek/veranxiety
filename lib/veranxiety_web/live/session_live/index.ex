@@ -64,6 +64,11 @@ defmodule VeranxietyWeb.SessionLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("navigate_back", _params, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/sessions")}
+  end
+
   defp apply_action(socket, :edit, %{"id" => id}) do
     session = Training.get_session!(id)
 

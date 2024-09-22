@@ -62,6 +62,11 @@ defmodule VeranxietyWeb.AllergyEntryLive do
     {:noreply, assign(socket, :symptoms, updated_symptoms)}
   end
 
+  @impl true
+  def handle_event("navigate_back", _params, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/allergy_entries")}
+  end
+
   defp apply_action(socket, :edit, %{"id" => id}) do
     entry = Allergy.get_entry!(id)
 
@@ -125,6 +130,32 @@ defmodule VeranxietyWeb.AllergyEntryLive do
       <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
         <%= if @live_action in [:new, :edit] do %>
           <div class="px-4 py-5 sm:p-6">
+            <!-- Back Button -->
+            <div class="mb-4">
+              <button
+                type="button"
+                phx-click="navigate_back"
+                class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+              >
+                <svg
+                  class="w-6 h-6 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  >
+                  </path>
+                </svg>
+                Back
+              </button>
+            </div>
+
             <.form
               :let={f}
               for={@changeset}
@@ -138,7 +169,7 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                   type="date"
                   label="Date (required)"
                   value={Phoenix.HTML.Form.input_value(f, :date)}
-                  class="mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-sky focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
+                  class="mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-black focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
                   required
                 />
               </div>
@@ -202,8 +233,15 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                 />
               </div>
 
-              <div class="mt-6 flex justify-end">
-                <.button type="submit" class="w-full bg-blue text-base hover:bg-sapphire">
+              <div class="mt-4 flex justify-between px-8">
+                <.button class="dark:bg-red dark:text-white" phx-click="navigate_back">
+                  Cancel
+                </.button>
+                <.button class="transition-colors duration-200
+                   light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
+                   light:border-2 light:border-pink-300 light:hover:border-pink-400
+                   dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
+                   font-medium rounded-lg px-4 py-2 text-sm">
                   <%= if @live_action == :new, do: "Add Entry", else: "Update Entry" %>
                 </.button>
               </div>
@@ -214,7 +252,10 @@ defmodule VeranxietyWeb.AllergyEntryLive do
             <div class="mb-6 flex justify-between items-center">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Allergy Entries</h3>
               <.link patch={~p"/allergy_entries/new"}>
-                <.button>New Entry</.button>
+                <.button class="dark:bg-mauve dark:text-black">
+                  <span>New Entry</span>
+                  <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
+                </.button>
               </.link>
             </div>
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

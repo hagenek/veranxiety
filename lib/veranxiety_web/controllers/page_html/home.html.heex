@@ -54,62 +54,24 @@
         </div>
       </div>
     </section>
-    <section id="features" class="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
+    <section class="w-full py-12 md:py-24 lg:py-32">
       <div class="container px-4 md:px-6">
-        <div class="grid gap-10 sm:grid-cols-2">
-          <div class="space-y-4">
-            <div class="inline-block rounded-lg bg-gray-100 p-2 dark:bg-gray-800">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="h-6 w-6"
-              >
-                <path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"></path>
-                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                <circle cx="12" cy="10" r="2"></circle>
-                <line x1="8" x2="8" y1="2" y2="4"></line>
-                <line x1="16" x2="16" y1="2" y2="4"></line>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold">Separation Anxiety Training</h3>
-            <p class="text-gray-500 dark:text-gray-400">
-              Track and manage your dog's separation anxiety training sessions. Monitor progress and get insights to help your furry friend feel more comfortable when alone.
+        <div class="flex flex-col items-center space-y-4 text-center">
+          <div class="space-y-2">
+            <h2 class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Comprehensive Care for Your Canine Companion
+            </h2>
+            <p class="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+              Veranxiety now offers both Separation Anxiety Training and Allergy Tracking. Give your dog the attention and care they deserve.
             </p>
-            <.link navigate={~p"/sessions"}>
-              <.button variant="link">Start Training</.button>
-            </.link>
           </div>
-          <div class="space-y-4">
-            <div class="inline-block rounded-lg bg-gray-100 p-2 dark:bg-gray-800">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="h-6 w-6"
-              >
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
-                <path d="M8 7h6"></path>
-                <path d="M8 11h8"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold">Allergy Diary</h3>
-            <p class="text-gray-500 dark:text-gray-400">
-              Keep a detailed log of your dog's allergy symptoms, triggers, and treatments. Identify patterns and work with your vet to provide the best care for your allergic pup.
-            </p>
-            <.button variant="link" disabled>Coming Soon</.button>
+          <div class="space-x-4">
+            <.link navigate={~p"/sessions"}>
+              <.button>Manage Anxiety</.button>
+            </.link>
+            <.link navigate={~p"/allergy_entries"}>
+              <.button variant="outline">Track Allergies</.button>
+            </.link>
           </div>
         </div>
       </div>

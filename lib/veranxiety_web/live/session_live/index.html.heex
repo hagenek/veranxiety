@@ -1,21 +1,49 @@
-<div class="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-0 px-0 md:px-auto md:mx-auto">
   <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
-    <div class="px-4 py-0 sm:px-6 bg-surface dark:bg-surface-dark">
-      <h2 class="text-2xl font-serif font-semibold text-gray-900 dark:text-gray-100">
-        <%= @page_title %>
-      </h2>
-    </div>
-
     <%= if @live_action in [:new, :edit] do %>
-      <div class="px-4 py-5 sm:p-6">
+      <div class="relative">
+        <!-- Add relative positioning to the container -->
+      <!-- Sticky Back Button -->
+        <div class="sticky top-0 z-10  shadow p-4">
+          <button
+            type="button"
+            phx-click="navigate_back"
+            class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          >
+            <svg
+              class="w-6 h-6 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              >
+              </path>
+            </svg>
+            Back
+          </button>
+        </div>
+        <div class="p-4">
+          <div class="mb-4 flex justify-center items-center">
+            <h1 class="text-2xl font-serif font-semibold text-gray-900 dark:text-gray-100">
+              <%= @page_title %>
+              <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
+            </h1>
+          </div>
+        </div>
         <.form
           :let={f}
           for={@changeset}
           phx-submit="save"
           phx-change="validate"
-          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md space-y-6"
         >
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <.input
                 field={f[:duration_minutes]}
@@ -70,14 +98,18 @@
             </div>
           </div>
 
-          <div class="mt-6 flex justify-end">
+          <div class="mt-4 flex justify-between px-8">
+            <.button class="dark:bg-red dark:text-white
+          " phx-click="navigate_back">
+              Cancel
+            </.button>
             <.primary_button
               type="submit"
               class="transition-colors duration-200
                light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
                light:border-2 light:border-pink-300 light:hover:border-pink-400
                dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
-               font-medium rounded-lg px-5 py-2.5 text-sm"
+               font-medium rounded-lg px-4 py-2 text-sm"
             >
               <%= if @live_action == :new, do: "Add Session", else: "Update Session" %>
             </.primary_button>
@@ -85,19 +117,19 @@
         </.form>
       </div>
     <% else %>
-      <div class="px-4 py-0 sm:p-0">
-        <div class="mb-2 flex justify-between items-center">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Session List</h3>
+      <div class="p-4">
+        <img
+          src={~p"/images/vera_sitting.jpg"}
+          alt="Vera"
+          class="w-[80%] md:w-[75%] mx-auto rounded-lg shadow-lg mb-4"
+        />
+        <div class="mb-4 flex justify-center items-center">
           <.link patch={~p"/sessions/new"}>
             <.primary_button>
-              New Session
+              <span>New Session</span>
+              <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
             </.primary_button>
           </.link>
-          <img
-            src={~p"/images/vera_sitting.jpg"}
-            alt="Vera"
-            class="w-full max-w-md mx-auto rounded-lg shadow-lg mb-6"
-          />
         </div>
 
         <.table id="sessions" rows={@sessions}>

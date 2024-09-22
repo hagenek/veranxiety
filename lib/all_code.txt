@@ -1302,45 +1302,95 @@ end
 
 defmodule VeranxietyWeb.Components.NavLinks do
   use Phoenix.Component
-  use VeranxietyWeb, :verified_routes
+  alias Phoenix.LiveView.JS
 
   def nav_links(assigns) do
     ~H"""
-    <ul class="flex space-x-4">
-      <li>
-        <.link
-          navigate={~p"/"}
-          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-        >
-          Home
-        </.link>
-      </li>
-      <li>
-        <.link
-          navigate={~p"/sessions"}
-          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-        >
-          Sessions
-        </.link>
-      </li>
-      <li>
-        <.link
-          navigate={~p"/sessions/new"}
-          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-        >
-          New Session
-        </.link>
-      </li>
-      <li>
-        <.link
-          navigate={~p"/allergy_entries"}
-          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-        >
-          Allergies
-        </.link>
-      </li>
-    </ul>
+    <nav class="bg-surface dark:bg-surface-dark">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="/" class="text-2xl font-bold text-text dark:text-text-dark">
+              Veranxiety
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <div class="ml-10 flex items-baseline space-x-4">
+              <%= for link <- links() do %>
+                <.link
+                  navigate={link.href}
+                  class="text-text dark:text-text-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  <%= link.label %>
+                </.link>
+              <% end %>
+            </div>
+          </div>
+          <div class="md:hidden">
+            <button
+              phx-click={JS.toggle(to: "#mobile-menu")}
+              class="inline-flex items-center justify-center p-2 rounded-md text-text dark:text-text-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            >
+              <span class="sr-only">Open main menu</span>
+              <svg
+                class="block h-6 w-6"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <svg
+                class="hidden h-6 w-6"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:hidden hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <%= for link <- links() do %>
+            <.link
+              navigate={link.href}
+              class="text-text dark:text-text-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark block px-3 py-2 rounded-md text-base font-medium"
+              phx-click={JS.toggle(to: "#mobile-menu")}
+            >
+              <%= link.label %>
+            </.link>
+          <% end %>
+        </div>
+      </div>
+    </nav>
     """
+  end
+
+  defp links do
+    [
+      %{href: "/", label: "Dashboard"},
+      %{href: "/sessions", label: "Training Log"},
+      %{href: "/sessions/new", label: "Record Training"},
+      %{href: "/allergy_entries", label: "Allergy Tracker"}
+    ]
   end
 end
 
@@ -1356,7 +1406,6 @@ defmodule VeranxietyWeb.Layouts do
     <div class="flex flex-col h-screen overflow-hidden dark:text-rose bg-base dark:bg-base-dark">
       <header class="flex-none bg-surface dark:bg-surface-dark shadow z-10">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 class="text-2xl font-bold text-text dark:text-text-dark">Veranxiety</h1>
           <nav>
             <.nav_links />
           </nav>
@@ -1382,7 +1431,7 @@ defmodule VeranxietyWeb.Layouts do
         </div>
       </header>
       <main class="flex-1 overflow-y-auto">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-0 px-2 sm:mx-auto py-0 md:py-6 sm:px-6 lg:px-8">
           <%= @inner_content %>
         </div>
       </main>
@@ -1481,6 +1530,11 @@ defmodule VeranxietyWeb.AllergyEntryLive do
     {:noreply, assign(socket, :symptoms, updated_symptoms)}
   end
 
+  @impl true
+  def handle_event("navigate_back", _params, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/allergy_entries")}
+  end
+
   defp apply_action(socket, :edit, %{"id" => id}) do
     entry = Allergy.get_entry!(id)
 
@@ -1544,6 +1598,32 @@ defmodule VeranxietyWeb.AllergyEntryLive do
       <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
         <%= if @live_action in [:new, :edit] do %>
           <div class="px-4 py-5 sm:p-6">
+            <!-- Back Button -->
+            <div class="mb-4">
+              <button
+                type="button"
+                phx-click="navigate_back"
+                class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+              >
+                <svg
+                  class="w-6 h-6 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  >
+                  </path>
+                </svg>
+                Back
+              </button>
+            </div>
+
             <.form
               :let={f}
               for={@changeset}
@@ -1557,7 +1637,7 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                   type="date"
                   label="Date (required)"
                   value={Phoenix.HTML.Form.input_value(f, :date)}
-                  class="mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-sky focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
+                  class="mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-black focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
                   required
                 />
               </div>
@@ -1621,8 +1701,15 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                 />
               </div>
 
-              <div class="mt-6 flex justify-end">
-                <.button type="submit" class="w-full bg-blue text-base hover:bg-sapphire">
+              <div class="mt-4 flex justify-between px-8">
+                <.button class="dark:bg-red dark:text-white" phx-click="navigate_back">
+                  Cancel
+                </.button>
+                <.button class="transition-colors duration-200
+                   light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
+                   light:border-2 light:border-pink-300 light:hover:border-pink-400
+                   dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
+                   font-medium rounded-lg px-4 py-2 text-sm">
                   <%= if @live_action == :new, do: "Add Entry", else: "Update Entry" %>
                 </.button>
               </div>
@@ -1633,7 +1720,10 @@ defmodule VeranxietyWeb.AllergyEntryLive do
             <div class="mb-6 flex justify-between items-center">
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Allergy Entries</h3>
               <.link patch={~p"/allergy_entries/new"}>
-                <.button>New Entry</.button>
+                <.button class="dark:bg-mauve dark:text-black">
+                  <span>New Entry</span>
+                  <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
+                </.button>
               </.link>
             </div>
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -1764,24 +1854,52 @@ end
 
 // File: ./veranxiety_web/live/session_live/index.html.heex
 
-<div class="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-0 px-0 md:px-auto md:mx-auto">
   <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
-    <div class="px-4 py-0 sm:px-6 bg-surface dark:bg-surface-dark">
-      <h2 class="text-2xl font-serif font-semibold text-gray-900 dark:text-gray-100">
-        <%= @page_title %>
-      </h2>
-    </div>
-
     <%= if @live_action in [:new, :edit] do %>
-      <div class="px-4 py-5 sm:p-6">
+      <div class="relative">
+        <!-- Add relative positioning to the container -->
+      <!-- Sticky Back Button -->
+        <div class="sticky top-0 z-10  shadow p-4">
+          <button
+            type="button"
+            phx-click="navigate_back"
+            class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          >
+            <svg
+              class="w-6 h-6 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              >
+              </path>
+            </svg>
+            Back
+          </button>
+        </div>
+        <div class="p-4">
+          <div class="mb-4 flex justify-center items-center">
+            <h1 class="text-2xl font-serif font-semibold text-gray-900 dark:text-gray-100">
+              <%= @page_title %>
+              <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
+            </h1>
+          </div>
+        </div>
         <.form
           :let={f}
           for={@changeset}
           phx-submit="save"
           phx-change="validate"
-          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md space-y-6"
         >
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <.input
                 field={f[:duration_minutes]}
@@ -1836,14 +1954,18 @@ end
             </div>
           </div>
 
-          <div class="mt-6 flex justify-end">
+          <div class="mt-4 flex justify-between px-8">
+            <.button class="dark:bg-red dark:text-white
+          " phx-click="navigate_back">
+              Cancel
+            </.button>
             <.primary_button
               type="submit"
               class="transition-colors duration-200
                light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
                light:border-2 light:border-pink-300 light:hover:border-pink-400
                dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
-               font-medium rounded-lg px-5 py-2.5 text-sm"
+               font-medium rounded-lg px-4 py-2 text-sm"
             >
               <%= if @live_action == :new, do: "Add Session", else: "Update Session" %>
             </.primary_button>
@@ -1851,19 +1973,19 @@ end
         </.form>
       </div>
     <% else %>
-      <div class="px-4 py-0 sm:p-0">
-        <div class="mb-2 flex justify-between items-center">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Session List</h3>
+      <div class="p-4">
+        <img
+          src={~p"/images/vera_sitting.jpg"}
+          alt="Vera"
+          class="w-[80%] md:w-[75%] mx-auto rounded-lg shadow-lg mb-4"
+        />
+        <div class="mb-4 flex justify-center items-center">
           <.link patch={~p"/sessions/new"}>
             <.primary_button>
-              New Session
+              <span>New Session</span>
+              <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
             </.primary_button>
           </.link>
-          <img
-            src={~p"/images/vera_sitting.jpg"}
-            alt="Vera"
-            class="w-full max-w-md mx-auto rounded-lg shadow-lg mb-6"
-          />
         </div>
 
         <.table id="sessions" rows={@sessions}>
@@ -2000,6 +2122,11 @@ defmodule VeranxietyWeb.SessionLive.Index do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
     end
+  end
+
+  @impl true
+  def handle_event("navigate_back", _params, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/sessions")}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -2253,137 +2380,98 @@ end
 
 // File: ./veranxiety_web/controllers/page_html/home.html.heex
 
-<div class="flex flex-col min-h-screen bg-background">
-  <header class="px-4 lg:px-6 h-14 flex items-center">
-    <a class="flex items-center justify-center" href="#">
-      <span class="sr-only">Veranxiety</span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 256 256"
-        class="h-6 w-6"
-        fill="currentColor"
-      >
-        <rect width="256" height="256" fill="none"></rect>
-        <path
-          d="M240,88V200a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V168H32a8,8,0,0,1,0-16H64V120H32a8,8,0,0,1,0-16H64V88A16,16,0,0,1,80,72H224A16,16,0,0,1,240,88Z"
-          opacity="0.2"
-        >
-        </path>
-        <path d="M240,88V200a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V168H32a8,8,0,0,1,0-16H64V120H32a8,8,0,0,1,0-16H64V88A16,16,0,0,1,80,72H224A16,16,0,0,1,240,88ZM80,88V200H224V88Z">
-        </path>
-      </svg>
-      <span class="ml-2 text-xl font-semibold">Veranxiety</span>
-    </a>
-    <nav class="ml-auto flex gap-4 sm:gap-6">
-      <a class="text-sm font-medium hover:underline underline-offset-4" href="#features">
-        Features
-      </a>
-      <a class="text-sm font-medium hover:underline underline-offset-4" href="#">
-        About
-      </a>
-      <a class="text-sm font-medium hover:underline underline-offset-4" href="#">
-        Contact
-      </a>
-    </nav>
-  </header>
-  <main class="flex-1">
-    <section class="w-full py-12 md:py-24 lg:py-32">
-      <div class="container px-4 md:px-6">
-        <div class="flex flex-col items-center space-y-4 text-center">
-          <div class="space-y-2">
-            <h1 class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-              Welcome to Veranxiety
-            </h1>
-            <p class="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-              Your Canine Companion's Health Hub - Manage separation anxiety and track allergies with ease.
-            </p>
-          </div>
-          <div class="space-x-4">
-            <.link navigate={~p"/sessions"}>
-              <.button>Get Started</.button>
-            </.link>
-            <.link href="#features">
-              <.button variant="outline">Learn More</.button>
-            </.link>
-          </div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Veranxiety - Your Canine Companion's Health Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="logo">Veranxiety</div>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button id="darkModeToggle" aria-label="Toggle dark mode">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>Veranxiety</h1>
+        <p>
+          Your Canine Companion's Health Hub - Manage separation anxiety and track allergies with ease.
+        </p>
+        <div class="cta-buttons">
+          <a href="/sessions" class="button primary">Get Started</a>
+          <a href="#features" class="button secondary">Learn More</a>
         </div>
-      </div>
-    </section>
-    <section id="features" class="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
-      <div class="container px-4 md:px-6">
-        <div class="grid gap-10 sm:grid-cols-2">
-          <div class="space-y-4">
-            <div class="inline-block rounded-lg bg-gray-100 p-2 dark:bg-gray-800">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="h-6 w-6"
-              >
-                <path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"></path>
-                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                <circle cx="12" cy="10" r="2"></circle>
-                <line x1="8" x2="8" y1="2" y2="4"></line>
-                <line x1="16" x2="16" y1="2" y2="4"></line>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold">Separation Anxiety Training</h3>
-            <p class="text-gray-500 dark:text-gray-400">
+      </section>
+
+      <section id="features">
+        <h2>Features</h2>
+        <div class="feature-cards">
+          <div class="card">
+            <h3>Separation Anxiety Training</h3>
+            <p>
               Track and manage your dog's separation anxiety training sessions. Monitor progress and get insights to help your furry friend feel more comfortable when alone.
             </p>
-            <.link navigate={~p"/sessions"}>
-              <.button variant="link">Start Training</.button>
-            </.link>
+            <a href="/sessions" class="learn-more">Start Training →</a>
           </div>
-          <div class="space-y-4">
-            <div class="inline-block rounded-lg bg-gray-100 p-2 dark:bg-gray-800">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="h-6 w-6"
-              >
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
-                <path d="M8 7h6"></path>
-                <path d="M8 11h8"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold">Allergy Diary</h3>
-            <p class="text-gray-500 dark:text-gray-400">
+          <div class="card">
+            <h3>Allergy Tracker</h3>
+            <p>
               Keep a detailed log of your dog's allergy symptoms, triggers, and treatments. Identify patterns and work with your vet to provide the best care for your allergic pup.
             </p>
-            <.button variant="link" disabled>Coming Soon</.button>
+            <a href="/allergy_entries" class="learn-more">Track Allergies →</a>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
-  <footer class="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-    <p class="text-xs text-gray-500 dark:text-gray-400">
-      © 2024 Veranxiety. All rights reserved.
-    </p>
-    <nav class="sm:ml-auto flex gap-4 sm:gap-6">
-      <a class="text-xs hover:underline underline-offset-4" href="#">
-        Terms of Service
-      </a>
-      <a class="text-xs hover:underline underline-offset-4" href="#">
-        Privacy
-      </a>
-    </nav>
-  </footer>
-</div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Veranxiety. All rights reserved.</p>
+      <nav>
+        <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>
+      </nav>
+    </footer>
+
+    <script>
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      const body = document.body;
+
+      function setDarkMode(isDark) {
+          body.classList.toggle('dark-mode', isDark);
+          localStorage.setItem('darkMode', isDark);
+      }
+
+      // Check for saved theme preference or use system preference
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const savedDarkMode = localStorage.getItem('darkMode');
+
+      if (savedDarkMode !== null) {
+          setDarkMode(savedDarkMode === 'true');
+      } else {
+          setDarkMode(prefersDark);
+      }
+
+      // Toggle dark mode
+      darkModeToggle.addEventListener('click', () => {
+          setDarkMode(!body.classList.contains('dark-mode'));
+      });
+    </script>
+  </body>
+</html>
 
 // File: ./veranxiety_web/controllers/error_html.ex
 
