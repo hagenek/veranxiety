@@ -1,93 +1,139 @@
-<div class="flex flex-col min-h-screen bg-background">
-  <header class="px-4 lg:px-6 h-14 flex items-center">
-    <a class="flex items-center justify-center" href="#">
-      <span class="sr-only">Veranxiety</span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 256 256"
-        class="h-6 w-6"
-        fill="currentColor"
-      >
-        <rect width="256" height="256" fill="none"></rect>
-        <path
-          d="M240,88V200a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V168H32a8,8,0,0,1,0-16H64V120H32a8,8,0,0,1,0-16H64V88A16,16,0,0,1,80,72H224A16,16,0,0,1,240,88Z"
-          opacity="0.2"
+<div class="flex flex-col min-h-screen">
+  <header class="bg-bg-secondary shadow-md">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <a class="flex items-center space-x-2" href="#">
+        <span class="text-2xl font-bold text-gray-800">Veranxiety</span>
+      </a>
+      <nav class="hidden md:flex space-x-6">
+        <a class="text-text-secondary hover:text-blue transition-colors" href="#features">
+          Features
+        </a>
+        <a class="text-text-secondary hover:text-blue transition-colors" href="#about">About</a>
+        <a class="text-text-secondary hover:text-blue transition-colors" href="#contact">
+          Contact
+        </a>
+      </nav>
+      <button class="md:hidden">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-        </path>
-        <path d="M240,88V200a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V168H32a8,8,0,0,1,0-16H64V120H32a8,8,0,0,1,0-16H64V88A16,16,0,0,1,80,72H224A16,16,0,0,1,240,88ZM80,88V200H224V88Z">
-        </path>
-      </svg>
-      <span class="ml-2 text-xl font-semibold">Veranxiety</span>
-    </a>
-    <nav class="ml-auto flex gap-4 sm:gap-6">
-      <a class="text-sm font-medium hover:underline underline-offset-4" href="#features">
-        Features
-      </a>
-      <a class="text-sm font-medium hover:underline underline-offset-4" href="#">
-        About
-      </a>
-      <a class="text-sm font-medium hover:underline underline-offset-4" href="#">
-        Contact
-      </a>
-    </nav>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+    </div>
   </header>
-  <main class="flex-1">
-    <section class="w-full py-12 md:py-24 lg:py-32">
-      <div class="container px-4 md:px-6">
-        <div class="flex flex-col items-center space-y-4 text-center">
-          <div class="space-y-2">
-            <h1 class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-              Welcome to Veranxiety
-            </h1>
-            <p class="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-              Your Canine Companion's Health Hub - Manage separation anxiety and track allergies with ease.
+
+  <main class="flex-grow">
+    <section class="bg-peach text-gray-800 py-20">
+      <div class="container mx-auto px-4 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 text-shadow">Welcome to Veranxiety</h1>
+        <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
+          Your Canine Companion's Health Hub - Manage separation anxiety and track allergies with ease.
+        </p>
+        <div class="space-x-4">
+          <a
+            href="#features"
+            class="bg-gray-800 text-peach font-semibold py-2 px-6 rounded-full hover:bg-opacity-90 transition-colors"
+          >
+            Get Started
+          </a>
+          <a
+            href="#features"
+            class="bg-transparent border-2 border-gray-800 text-gray-800 font-semibold py-2 px-6 hover:bg-black hover:text-peach rounded-full transition-colors"
+          >
+            Learn More
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="py-20 bg-bg-secondary">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+          Comprehensive Care for Your Canine Companion
+        </h2>
+        <div class="grid md:grid-cols-2 gap-12">
+          <div class="bg-sky p-6 rounded-lg shadow-lg">
+            <img
+              src="https://plus.unsplash.com/premium_photo-1667860901695-aede54fe01a8?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Dog being comforted"
+              class="w-full h-48 object-cover rounded-lg mb-4"
+            />
+            <h3 class="text-2xl font-semibold mb-2">Separation Anxiety Training</h3>
+            <p class="text-text-secondary mb-4">
+              Help your furry friend overcome separation anxiety with our comprehensive training program.
             </p>
+            <a
+              href="/sessions"
+              class="text-sapphire bg-gray-800 font-semibold py-2 px-6 rounded-full hover:bg-opacity-90 transition-colors"
+            >
+              Manage Anxiety →
+            </a>
           </div>
-          <div class="space-x-4">
-            <.link navigate={~p"/sessions"}>
-              <.button>Get Started</.button>
-            </.link>
-            <.link href="#features">
-              <.button variant="outline">Learn More</.button>
-            </.link>
+          <div class="bg-peach p-6 rounded-lg shadow-lg">
+            <img
+              src="https://images.unsplash.com/photo-1516371535707-512a1e83bb9a?q=80&w=3264&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Dog with allergy symptoms"
+              class="w-full h-48 object-cover rounded-lg mb-4"
+            />
+            <h3 class="text-2xl font-semibold mb-2">Allergy Tracking</h3>
+            <p class="text-text-secondary mb-4">
+              Keep tabs on your dog's allergies and symptoms with our easy-to-use tracking system.
+            </p>
+            <a
+              href="/allergy_entries"
+              class="bg-gray-800 text-peach font-semibold py-2 px-6 rounded-full hover:bg-opacity-90 transition-colors"
+            >
+              Start tracking
+            </a>
           </div>
         </div>
       </div>
     </section>
-    <section class="w-full py-12 md:py-24 lg:py-32">
-      <div class="container px-4 md:px-6">
-        <div class="flex flex-col items-center space-y-4 text-center">
-          <div class="space-y-2">
-            <h2 class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Comprehensive Care for Your Canine Companion
-            </h2>
-            <p class="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-              Veranxiety now offers both Separation Anxiety Training and Allergy Tracking. Give your dog the attention and care they deserve.
-            </p>
-          </div>
-          <div class="space-x-4">
-            <.link navigate={~p"/sessions"}>
-              <.button>Manage Anxiety</.button>
-            </.link>
-            <.link navigate={~p"/allergy_entries"}>
-              <.button variant="outline">Track Allergies</.button>
-            </.link>
-          </div>
-        </div>
+
+    <section id="about" class="py-20">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8">About Veranxiety</h2>
+        <p class="text-xl text-text-secondary max-w-2xl mx-auto">
+          We're passionate about improving the lives of dogs and their owners. Our platform combines cutting-edge technology with expert veterinary knowledge to provide the best care for your furry friends.
+        </p>
+      </div>
+    </section>
+
+    <section id="contact" class="py-20 bg-bg-secondary">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8">Get in Touch</h2>
+        <p class="text-xl text-text-secondary max-w-2xl mx-auto mb-8">
+          Have questions or need support? We're here to help!
+        </p>
+        <a
+          href="#"
+          class="bg-transparent border-2 border-gray-800 text-gray-800 font-semibold py-2 px-6 hover:bg-black hover:text-peach rounded-full transition-colors"
+        >
+          Contact Us
+        </a>
       </div>
     </section>
   </main>
-  <footer class="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-    <p class="text-xs text-gray-500 dark:text-gray-400">
-      © 2024 Veranxiety. All rights reserved.
-    </p>
-    <nav class="sm:ml-auto flex gap-4 sm:gap-6">
-      <a class="text-xs hover:underline underline-offset-4" href="#">
-        Terms of Service
-      </a>
-      <a class="text-xs hover:underline underline-offset-4" href="#">
-        Privacy
-      </a>
-    </nav>
+
+  <footer class="bg-bg-secondary py-8">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <p class="text-text-secondary text-sm">&copy; 2024 Veranxiety. All rights reserved.</p>
+        <nav class="flex space-x-4 mt-4 md:mt-0">
+          <a href="#" class="text-text-secondary hover:text-blue text-sm">Terms of Service</a>
+          <a href="#" class="text-text-secondary hover:text-blue text-sm">Privacy Policy</a>
+        </nav>
+      </div>
+    </div>
   </footer>
 </div>

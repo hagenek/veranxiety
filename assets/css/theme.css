@@ -28,32 +28,37 @@
     --base: #1e1e2e;
     --mantle: #181825;
     --crust: #11111b;
-  }
+}
 
-  :root:not(.dark) {
+:root:not(.dark) {
     --bg-primary: #ffffff;
     --bg-secondary: #f3f4f6;
     --text-primary: #111827;
     --text-secondary: #4b5563;
-  }
+}
 
-  .dark {
+.dark {
     --bg-primary: var(--base);
     --bg-secondary: var(--surface0);
     --text-primary: var(--text);
     --text-secondary: var(--subtext1);
-  }
+}
 
-  .light {
+.light {
     --bg-primary: #ffffff;
     --bg-secondary: #f3f4f6;
     --text-primary: #111827;
     --text-secondary: #4b5563;
-  }
+}
 
-
-
-  body {
+body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-  }
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, var(--blue), var(--lavender));
+}
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
