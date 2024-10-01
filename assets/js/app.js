@@ -38,22 +38,6 @@ window.addEventListener("phx:page-loading-stop", (_info) => topbar.hide());
 // connect if there are any LiveViews on the page
 liveSocket.connect();
 
-const darkModeToggle = document.getElementById("dark-mode-toggle");
-const htmlElement = document.documentElement;
-
-darkModeToggle.addEventListener("click", () => {
-  htmlElement.classList.toggle("dark");
-  localStorage.setItem("darkMode", htmlElement.classList.contains("dark"));
-});
-
-if (
-  localStorage.getItem("darkMode") === "true" ||
-  (window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches)
-) {
-  htmlElement.classList.add("dark");
-}
-
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session

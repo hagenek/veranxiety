@@ -2,3 +2,40 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "./theme.css"; /* This file is for your main application CSS */
+
+.veranxiety-dropdown {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+.veranxiety-dropdown.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.veranxiety-mobile-menu {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+.veranxiety-mobile-menu.active {
+    transform: translateX(0);
+}
+.veranxiety-menu-item {
+    position: relative;
+    overflow: hidden;
+}
+.veranxiety-menu-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: currentColor;
+    transform: translateX(-101%);
+    transition: transform 0.3s ease;
+}
+.veranxiety-menu-item:hover::after {
+    transform: translateX(0);
+}

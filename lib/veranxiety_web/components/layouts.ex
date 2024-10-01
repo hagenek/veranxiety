@@ -8,11 +8,14 @@ defmodule VeranxietyWeb.Layouts do
     <div class="flex flex-col h-screen overflow-hidden dark:text-rose bg-base dark:bg-base-dark">
       <header class="flex-none bg-surface dark:bg-surface-dark shadow z-10">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <nav>
+          <nav>
             <.nav_links current_user={@current_user} />
           </nav>
           <button
             id="dark-mode-toggle"
+            x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' || window.matchMedia('(prefers-color-scheme: dark)').matches }"
+            x-init="$watch('darkMode', value => { document.documentElement.classList.toggle('dark', value); localStorage.setItem('darkMode', value); })"
+            @click="darkMode = !darkMode"
             class="text-gray-500 p-2 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
             <svg

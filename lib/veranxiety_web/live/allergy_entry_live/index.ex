@@ -26,7 +26,7 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   def handle_event("delete", %{"id" => id}, socket) do
     current_user = socket.assigns.current_user
     entry = Allergy.get_entry!(current_user, id)
-    {:ok, _} = Allergy.delete_entry(entry)
+    {:ok, _} = Allergy.delete_entry(current_user, entry)
     {:noreply, assign(socket, :entries, list_entries(current_user))}
   end
 
@@ -51,10 +51,6 @@ defmodule VeranxietyWeb.AllergyEntryLive do
     save_entry(socket, socket.assigns.live_action, updated_params)
   end
 
-  defp format_date(date) do
-    Calendar.strftime(date, "%a %d. %B %Y")
-  end
-
   @impl true
   def handle_event("set_itch_score", %{"score" => score}, socket) do
     {:noreply, assign(socket, :itch_score, String.to_integer(score))}
@@ -75,6 +71,10 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   @impl true
   def handle_event("navigate_back", _params, socket) do
     {:noreply, push_navigate(socket, to: ~p"/allergy_entries")}
+  end
+
+  defp format_date(date) do
+    Calendar.strftime(date, "%a %d. %B %Y")
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -108,7 +108,9 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   end
 
   defp save_entry(socket, :edit, entry_params) do
-    case Allergy.update_entry(socket.assigns.entry, entry_params) do
+    current_user = socket.assigns.current_user
+
+    case Allergy.update_entry(current_user, socket.assigns.entry, entry_params) do
       {:ok, _entry} ->
         {:noreply,
          socket
@@ -138,8 +140,6 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   defp list_entries(current_user) do
     Allergy.list_allergy_entries(current_user)
   end
-
-
 
   defp itch_score_classes(score) do
     base_classes = "mt-2 px-3 py-1 w-fit text-xs font-semibold rounded-full"

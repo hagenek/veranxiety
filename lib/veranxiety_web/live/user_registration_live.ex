@@ -6,12 +6,15 @@ defmodule VeranxietyWeb.UserRegistrationLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
-      <.header class="text-center">
+    <div class="mx-auto max-w-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+      <.header class="text-center dark:text-gray-200">
         Register for an account
         <:subtitle>
           Already registered?
-          <.link navigate={~p"/users/log_in"} class="font-semibold text-brand hover:underline">
+          <.link
+            navigate={~p"/users/log_in"}
+            class="font-semibold text-brand dark:text-gray-200 hover:underline"
+          >
             Log in
           </.link>
           to your account now.
@@ -26,16 +29,34 @@ defmodule VeranxietyWeb.UserRegistrationLive do
         phx-trigger-action={@trigger_submit}
         action={~p"/users/log_in?_action=registered"}
         method="post"
+        class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-md"
       >
         <.error :if={@check_errors}>
           Oops, something went wrong! Please check the errors below.
         </.error>
 
-        <.input field={@form[:email]} type="email" label="Email" required />
-        <.input field={@form[:password]} type="password" label="Password" required />
+        <.input
+          field={@form[:email]}
+          type="email"
+          label="Email"
+          required
+          class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+        />
+        <.input
+          field={@form[:password]}
+          type="password"
+          label="Password"
+          required
+          class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+        />
 
         <:actions>
-          <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>
+          <.button
+            phx-disable-with="Creating account..."
+            class="w-full bg-brand dark:bg-brand-light text-white dark:text-gray-200 hover:bg-brand-dark dark:hover:bg-brand hover:text-white"
+          >
+            Create an account
+          </.button>
         </:actions>
       </.simple_form>
     </div>

@@ -6,10 +6,13 @@ defmodule VeranxietyWeb.SessionLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    current_user = socket.assigns.current_user
+
     {:ok,
      socket
-     |> assign(:sessions, list_sessions())
-     |> assign(:changeset, Training.change_session(%Session{}))}
+     |> assign(:sessions, list_sessions(current_user))
+     |> assign(:changeset, Training.change_session(%Session{}))
+     |> assign(:current_user, current_user)}
   end
 
   def get_duration_minutes(changeset) do
@@ -43,10 +46,10 @@ defmodule VeranxietyWeb.SessionLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    session = Training.get_session!(id)
-    {:ok, _} = Training.delete_session(session)
+    session = Training.get_session!(socket.assigns.current_user, id)
+    {:ok, _} = Training.delete_session(socket.assigns.current_user, session)
 
-    {:noreply, assign(socket, :sessions, list_sessions())}
+    {:noreply, assign(socket, :sessions, list_sessions(socket.assigns.current_user))}
   end
 
   @impl true
@@ -57,7 +60,7 @@ defmodule VeranxietyWeb.SessionLive.Index do
          socket
          |> put_flash(:info, "Session saved successfully")
          |> push_navigate(to: ~p"/sessions")
-         |> assign(:sessions, list_sessions())}
+         |> assign(:sessions, list_sessions(socket.assigns.current_user))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -70,7 +73,7 @@ defmodule VeranxietyWeb.SessionLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    session = Training.get_session!(id)
+    session = Training.get_session!(socket.assigns.current_user, id)
 
     socket
     |> assign(:page_title, "Edit Session")
@@ -92,8 +95,8 @@ defmodule VeranxietyWeb.SessionLive.Index do
     |> assign(:changeset, Training.change_session(%Session{}))
   end
 
-  defp list_sessions do
-    Training.list_sessions()
+  defp list_sessions(user) do
+    Training.list_sessions(user)
   end
 
   defp create_or_update_session(socket, session_params) do
@@ -101,10 +104,14 @@ defmodule VeranxietyWeb.SessionLive.Index do
 
     case socket.assigns.live_action do
       :edit ->
-        Training.update_session(socket.assigns.session, session_params)
+        Training.update_session(
+          socket.assigns.current_user,
+          socket.assigns.session,
+          session_params
+        )
 
       :new ->
-        Training.create_session(session_params)
+        Training.create_session(socket.assigns.current_user, session_params)
     end
   end
 

@@ -1,4 +1,4 @@
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen" x-data="{ isOpen: false }">
   <header class="bg-bg-secondary shadow-md">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <a class="flex items-center space-x-2" href="#">
@@ -13,7 +13,8 @@
           Contact
         </a>
       </nav>
-      <button class="md:hidden">
+      <!-- Button to toggle mobile menu -->
+      <button @click="isOpen = !isOpen" class="md:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-6 w-6"
@@ -31,6 +32,18 @@
       </button>
     </div>
   </header>
+  <!-- Mobile Menu using Alpine.js -->
+  <nav
+    x-show="isOpen"
+    x-transition
+    x-bind:class="{'block': isOpen, 'hidden': !isOpen}"
+    class="md:hidden flex flex-col space-y-2 px-4 py-2 bg-bg-secondary"
+    @click.outside="isOpen = false"
+  >
+    <a class="text-text-secondary hover:text-blue transition-colors" href="#features">Features</a>
+    <a class="text-text-secondary hover:text-blue transition-colors" href="#about">About</a>
+    <a class="text-text-secondary hover:text-blue transition-colors" href="#contact">Contact</a>
+  </nav>
 
   <main class="flex-grow">
     <section class="bg-peach text-gray-800 py-20">
