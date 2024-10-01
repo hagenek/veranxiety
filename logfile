@@ -37,3 +37,5 @@
 2024-10-01 17:38:49.248 CEST [71101] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.614 s, sync=0.004 s, total=0.627 s; sync files=7, longest=0.003 s, average=0.001 s; distance=1 kB, estimate=1086 kB; lsn=0/1EBCC30, redo lsn=0/1EBCBA0
 2024-10-01 17:43:48.690 CEST [71101] LOG:  checkpoint starting: time
 2024-10-01 17:43:48.803 CEST [71101] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.103 s, sync=0.004 s, total=0.113 s; sync files=2, longest=0.003 s, average=0.002 s; distance=0 kB, estimate=977 kB; lsn=0/1EBCF50, redo lsn=0/1EBCEF8
+2024-10-01 19:28:54.382 CEST [71101] LOG:  checkpoint starting: time
+2024-10-01 19:28:55.041 CEST [71101] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.637 s, sync=0.005 s, total=0.661 s; sync files=7, longest=0.004 s, average=0.001 s; distance=2 kB, estimate=880 kB; lsn=0/1EBD768, redo lsn=0/1EBD710

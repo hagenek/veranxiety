@@ -2,6 +2,7 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "./theme.css"; /* This file is for your main application CSS */
+@import "./alpine.css";
 
 @keyframes gradientBG {
     0% { background-position: 0% 50%; }
@@ -60,6 +61,14 @@
     transition: transform 0.3s ease;
 }
 
-.veranxiety-menu-button:hover {
-    transform: rotate(90deg);
+#menu-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+#menu-icon.transform.rotate-180 {
+    transform: rotate(180deg);
+}
+
+#menu-icon.transform.rotate-0 {
+    transform: rotate(0deg);
 }

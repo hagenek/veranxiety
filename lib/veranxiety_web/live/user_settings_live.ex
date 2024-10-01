@@ -10,7 +10,7 @@ defmodule VeranxietyWeb.UserSettingsLive do
       <:subtitle>Manage your account email address and password settings</:subtitle>
     </.header>
 
-    <div class="space-y-12 divide-y">
+    <div class="divide-y mt-4">
       <div>
         <.simple_form
           for={@email_form}
@@ -29,7 +29,8 @@ defmodule VeranxietyWeb.UserSettingsLive do
             required
           />
           <:actions>
-            <.button phx-disable-with="Changing...">Change Email</.button>
+            <.button             class="w-full bg-brand dark:bg-surface-1 text-white dark:text-peach"
+            phx-disable-with="Changing...">Change Email</.button>
           </:actions>
         </.simple_form>
       </div>
@@ -65,7 +66,8 @@ defmodule VeranxietyWeb.UserSettingsLive do
             required
           />
           <:actions>
-            <.button phx-disable-with="Changing...">Change Password</.button>
+            <.button             class="w-full bg-brand dark:bg-surface-1 text-white dark:text-peach"
+            phx-disable-with="Changing...">Change Password</.button>
           </:actions>
         </.simple_form>
       </div>
