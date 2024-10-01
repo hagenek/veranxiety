@@ -3,6 +3,8 @@
 @import "tailwindcss/utilities";
 @import "./theme.css"; /* This file is for your main application CSS */
 @import "./alpine.css";
+@import "./nativelike.css";
+
 
 @keyframes gradientBG {
     0% { background-position: 0% 50%; }

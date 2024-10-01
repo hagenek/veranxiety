@@ -2,6 +2,7 @@ defmodule VeranxietyWeb.Layouts do
   use VeranxietyWeb, :html
 
   embed_templates "layouts/*"
+  alias VeranxietyWeb.Components.BottomNav
 
   def app(assigns) do
     ~H"""
@@ -71,6 +72,7 @@ defmodule VeranxietyWeb.Layouts do
           <%= @inner_content %>
         </div>
       </main>
+      <BottomNav.bottom_nav />
       <footer class="bg-surface dark:bg-surface-dark py-4 text-center text-sm text-gray-500 dark:text-gray-400">
         <p>&copy; <%= DateTime.utc_now().year %> Veranxiety. All rights reserved.</p>
       </footer>

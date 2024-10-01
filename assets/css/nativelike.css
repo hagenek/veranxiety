@@ -1,0 +1,40 @@
+.bottom-nav {
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .bottom-nav a {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .bottom-nav a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background-color: #3b82f6; /* Tailwind's blue-500 */
+    transition: all 0.3s ease;
+  }
+  
+  .bottom-nav a:hover::before,
+  .bottom-nav a.active::before {
+    width: 100%;
+    left: 0;
+  }
+  
+  .bottom-nav a svg {
+    transition: transform 0.3s ease;
+  }
+  
+  .bottom-nav a:hover svg,
+  .bottom-nav a.active svg {
+    transform: translateY(-2px);
+  }
+  
+  @media (min-width: 768px) {
+    .bottom-nav {
+      display: none;
+    }
+  }

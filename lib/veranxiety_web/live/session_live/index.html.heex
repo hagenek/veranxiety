@@ -2,12 +2,7 @@
   <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
     <%= if @live_action in [:new, :edit] do %>
       <div class="px-4 py-5 sm:p-6">
-        <img
-          src={~p"/images/vera_sitting.jpg"}
-          alt="Vera"
-          class="w-full max-w-md mx-auto rounded-lg shadow-lg mb-6"
-        />
-
+        <h1><%= if @live_action == :new, do: "New Session", else: "Edit Session" %></h1>
         <.form
           :let={f}
           for={@changeset}
@@ -71,16 +66,9 @@
           </div>
 
           <div class="mt-6 flex justify-end">
-            <.primary_button
-              type="submit"
-              class="transition-colors duration-200
-               light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
-               light:border-2 light:border-pink-300 light:hover:border-pink-400
-               dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
-               font-medium rounded-lg px-5 py-2.5 text-sm"
-            >
+            <.button class="dark:bg-surface-1 dark:text-peach" type="submit">
               <%= if @live_action == :new, do: "Add Session", else: "Update Session" %>
-            </.primary_button>
+            </.button>
           </div>
         </.form>
       </div>
@@ -90,16 +78,16 @@
           <img
             src={~p"/images/vera_sitting.jpg"}
             alt="Vera"
-            class="w-[80%] md:w-full mx-auto rounded-lg shadow-lg"
+            class="w-[60%] md:w-full mx-auto rounded-lg shadow-lg"
           />
         </div>
         <div class="md:w-2/3">
           <div class="mb-4 flex justify-center md:justify-start items-center">
             <.link patch={~p"/sessions/new"}>
-              <.primary_button>
+              <.button class="dark:bg-surface-1 dark:text-peach">
                 <span>New Session</span>
                 <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
-              </.primary_button>
+              </.button>
             </.link>
           </div>
 
