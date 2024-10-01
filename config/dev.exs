@@ -3,8 +3,7 @@ import Config
 # Configure your database
 config :veranxiety, Veranxiety.Repo,
   username: "postgres",
-  password: "postgres",
-  port: 5435,
+  port: 5432,
   hostname: "localhost",
   database: "veranxiety_dev",
   stacktrace: true,

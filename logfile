@@ -1,0 +1,17 @@
+2024-10-01 13:08:42.088 CEST [71100] LOG:  starting PostgreSQL 17.0 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0, 64-bit
+2024-10-01 13:08:42.088 CEST [71100] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-10-01 13:08:42.091 CEST [71100] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-10-01 13:08:42.094 CEST [71103] LOG:  database system was shut down at 2024-10-01 13:08:38 CEST
+2024-10-01 13:08:42.097 CEST [71100] LOG:  database system is ready to accept connections
+2024-10-01 13:13:42.099 CEST [71101] LOG:  checkpoint starting: time
+2024-10-01 13:15:21.322 CEST [71101] LOG:  checkpoint complete: wrote 992 buffers (6.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=99.159 s, sync=0.047 s, total=99.223 s; sync files=322, longest=0.008 s, average=0.001 s; distance=4630 kB, estimate=4630 kB; lsn=0/196FF58, redo lsn=0/196FEC8
+2024-10-01 13:23:42.491 CEST [71101] LOG:  checkpoint starting: time
+2024-10-01 13:25:18.250 CEST [71101] LOG:  checkpoint complete: wrote 956 buffers (5.8%); 1 WAL file(s) added, 0 removed, 0 recycled; write=95.641 s, sync=0.075 s, total=95.759 s; sync files=315, longest=0.014 s, average=0.001 s; distance=4460 kB, estimate=4613 kB; lsn=0/1DDAF00, redo lsn=0/1DCAEE8
+2024-10-01 13:28:42.290 CEST [71101] LOG:  checkpoint starting: time
+2024-10-01 13:28:45.213 CEST [71101] LOG:  checkpoint complete: wrote 30 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.911 s, sync=0.006 s, total=2.924 s; sync files=21, longest=0.002 s, average=0.001 s; distance=74 kB, estimate=4159 kB; lsn=0/1DDD7A8, redo lsn=0/1DDD750
+2024-10-01 14:13:42.889 CEST [71101] LOG:  checkpoint starting: time
+2024-10-01 14:13:43.522 CEST [71101] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.610 s, sync=0.016 s, total=0.634 s; sync files=7, longest=0.014 s, average=0.003 s; distance=1 kB, estimate=3744 kB; lsn=0/1DDDEB0, redo lsn=0/1DDDE58
+2024-10-01 15:03:43.623 CEST [71101] LOG:  checkpoint starting: time
+2024-10-01 15:03:58.655 CEST [71101] LOG:  checkpoint complete: wrote 150 buffers (0.9%); 0 WAL file(s) added, 0 removed, 0 recycled; write=14.992 s, sync=0.029 s, total=15.033 s; sync files=96, longest=0.015 s, average=0.001 s; distance=728 kB, estimate=3442 kB; lsn=0/1E94258, redo lsn=0/1E941C8
+2024-10-01 15:08:43.746 CEST [71101] LOG:  checkpoint starting: time
+2024-10-01 15:08:47.682 CEST [71101] LOG:  checkpoint complete: wrote 40 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.911 s, sync=0.006 s, total=3.936 s; sync files=33, longest=0.002 s, average=0.001 s; distance=147 kB, estimate=3112 kB; lsn=0/1EB8E70, redo lsn=0/1EB8DE0

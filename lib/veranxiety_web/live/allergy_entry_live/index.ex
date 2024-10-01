@@ -1,3 +1,5 @@
+# File: ./veranxiety_web/live/allergy_entry_live/index.ex
+
 defmodule VeranxietyWeb.AllergyEntryLive do
   use VeranxietyWeb, :live_view
   alias Veranxiety.Allergy
@@ -5,7 +7,14 @@ defmodule VeranxietyWeb.AllergyEntryLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, entries: list_entries(), itch_score: nil, symptoms: [])}
+    current_user = socket.assigns.current_user
+
+    {:ok,
+     socket
+     |> assign(:entries, list_entries(current_user))
+     |> assign(:itch_score, nil)
+     |> assign(:symptoms, [])
+     |> assign(:current_user, current_user)}
   end
 
   @impl true
@@ -15,9 +24,10 @@ defmodule VeranxietyWeb.AllergyEntryLive do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    entry = Allergy.get_entry!(id)
+    current_user = socket.assigns.current_user
+    entry = Allergy.get_entry!(current_user, id)
     {:ok, _} = Allergy.delete_entry(entry)
-    {:noreply, assign(socket, :entries, list_entries())}
+    {:noreply, assign(socket, :entries, list_entries(current_user))}
   end
 
   @impl true
@@ -68,7 +78,8 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    entry = Allergy.get_entry!(id)
+    current_user = socket.assigns.current_user
+    entry = Allergy.get_entry!(current_user, id)
 
     socket
     |> assign(:page_title, "Edit Allergy Entry")
@@ -87,9 +98,12 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   end
 
   defp apply_action(socket, :index, _params) do
+    current_user = socket.assigns.current_user
+
     socket
     |> assign(:page_title, "Allergy Entries")
     |> assign(:entry, nil)
+    |> assign(:entries, list_entries(current_user))
     |> assign(:changeset, nil)
   end
 
@@ -107,7 +121,9 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   end
 
   defp save_entry(socket, :new, entry_params) do
-    case Allergy.create_entry(entry_params) do
+    current_user = socket.assigns.current_user
+
+    case Allergy.create_entry(current_user, entry_params) do
       {:ok, _entry} ->
         {:noreply,
          socket
@@ -119,8 +135,31 @@ defmodule VeranxietyWeb.AllergyEntryLive do
     end
   end
 
-  defp list_entries do
-    Allergy.list_allergy_entries()
+  defp list_entries(current_user) do
+    Allergy.list_allergy_entries(current_user)
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <!-- Your existing render code goes here -->
+    """
+  end
+
+  defp itch_score_classes(score) do
+    base_classes = "mt-2 px-3 py-1 w-fit text-xs font-semibold rounded-full"
+
+    score_specific_classes =
+      case score do
+        0 -> "bg-green text-crust dark:bg-green dark:text-base"
+        1 -> "bg-yellow text-crust dark:bg-yellow dark:text-base"
+        2 -> "bg-peach text-crust dark:bg-peach dark:text-base"
+        3 -> "bg-red text-crust dark:bg-maroon dark:text-base"
+        4 -> "bg-mauve text-crust dark:bg-red dark:text-base"
+        _ -> "bg-surface0 text-text dark:bg-surface1 dark:text-text"
+      end
+
+    "#{base_classes} #{score_specific_classes}"
   end
 
   @impl true

@@ -76,6 +76,7 @@ defmodule VeranxietyWeb do
 
       # Include general helpers for rendering HTML
       unquote(html_helpers())
+      import VeranxietyWeb.UserAuth, only: [assign_current_user: 1]
     end
   end
 

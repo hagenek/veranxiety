@@ -3,6 +3,8 @@ defmodule VeranxietyWeb.Components.NavLinks do
   alias Phoenix.LiveView.JS
 
   def nav_links(assigns) do
+    assigns = assign_new(assigns, :current_user, fn -> nil end)
+
     ~H"""
     <nav class="bg-surface dark:bg-surface-dark">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,7 +16,7 @@ defmodule VeranxietyWeb.Components.NavLinks do
           </div>
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
-              <%= for link <- links() do %>
+              <%= for link <- links(@current_user) do %>
                 <.link
                   navigate={link.href}
                   class="text-text dark:text-text-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark px-3 py-2 rounded-md text-sm font-medium"
@@ -67,7 +69,7 @@ defmodule VeranxietyWeb.Components.NavLinks do
 
       <div class="md:hidden hidden" id="mobile-menu">
         <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <%= for link <- links() do %>
+          <%= for link <- links(@current_user) do %>
             <.link
               navigate={link.href}
               class="text-text dark:text-text-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark block px-3 py-2 rounded-md text-base font-medium"
@@ -82,12 +84,34 @@ defmodule VeranxietyWeb.Components.NavLinks do
     """
   end
 
-  defp links do
-    [
-      %{href: "/", label: "Dashboard"},
+  defp links(current_user) do
+    public_links = [
+      %{href: "/", label: "Dashboard"}
+    ]
+
+    authenticated_links = [
       %{href: "/sessions", label: "Training Log"},
       %{href: "/sessions/new", label: "Record Training"},
       %{href: "/allergy_entries", label: "Allergy Tracker"}
     ]
+
+    auth_links = if current_user do
+      [
+        %{href: "#", label: current_user.email},
+        %{href: "/users/settings", label: "Settings"},
+        %{href: "/users/log_out", label: "Log out", method: :delete}
+      ]
+    else
+      [
+        %{href: "/users/register", label: "Register"},
+        %{href: "/users/log_in", label: "Log in"}
+      ]
+    end
+
+    if current_user do
+      public_links ++ authenticated_links ++ auth_links
+    else
+      public_links ++ auth_links
+    end
   end
 end

@@ -8,8 +8,8 @@ defmodule VeranxietyWeb.Layouts do
     <div class="flex flex-col h-screen overflow-hidden dark:text-rose bg-base dark:bg-base-dark">
       <header class="flex-none bg-surface dark:bg-surface-dark shadow z-10">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <nav>
-            <.nav_links />
+        <nav>
+            <.nav_links current_user={@current_user} />
           </nav>
           <button
             id="dark-mode-toggle"
@@ -32,6 +32,7 @@ defmodule VeranxietyWeb.Layouts do
           </button>
         </div>
       </header>
+
       <main class="flex-1 overflow-y-auto">
         <div class="max-w-7xl mx-0 px-2 sm:mx-auto py-0 md:py-6 sm:px-6 lg:px-8">
           <%= @inner_content %>
