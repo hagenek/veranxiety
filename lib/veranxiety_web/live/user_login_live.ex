@@ -2,12 +2,12 @@ defmodule VeranxietyWeb.UserLoginLive do
   use VeranxietyWeb, :live_view
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
+    <div class="mx-auto max-w-sm mt-4">
       <.header class="text-center">
         Log in to account
         <:subtitle>
           Don't have an account?
-          <.link navigate={~p"/users/register"} class="font-semibold text-brand hover:underline">
+          <.link navigate={~p"/users/register"} class="font-bold text-brand dark:text-peach hover:underline">
             Sign up
           </.link>
           for an account now.
@@ -25,7 +25,10 @@ defmodule VeranxietyWeb.UserLoginLive do
           </.link>
         </:actions>
         <:actions>
-          <.button phx-disable-with="Logging in..." class="w-full">
+        <.button
+            phx-disable-with="Logging in..."
+            class="w-full bg-brand dark:bg-surface-1 text-white dark:text-peach"
+          >
             Log in <span aria-hidden="true">→</span>
           </.button>
         </:actions>

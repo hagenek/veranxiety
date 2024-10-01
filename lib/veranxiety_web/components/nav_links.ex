@@ -6,14 +6,9 @@ defmodule VeranxietyWeb.Components.NavLinks do
     assigns = assign_new(assigns, :current_user, fn -> nil end)
 
     ~H"""
-    <nav class="bg-surface dark:bg-surface-dark">
+    <nav class="bg-bg-secondary md-shadow">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <div class="flex items-center">
-            <a href="/" class="text-2xl font-bold text-text dark:text-text-dark">
-              Veranxiety
-            </a>
-          </div>
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
               <%= for link <- links(@current_user) do %>
@@ -95,18 +90,19 @@ defmodule VeranxietyWeb.Components.NavLinks do
       %{href: "/allergy_entries", label: "Allergy Tracker"}
     ]
 
-    auth_links = if current_user do
-      [
-        %{href: "#", label: current_user.email},
-        %{href: "/users/settings", label: "Settings"},
-        %{href: "/users/log_out", label: "Log out", method: :delete}
-      ]
-    else
-      [
-        %{href: "/users/register", label: "Register"},
-        %{href: "/users/log_in", label: "Log in"}
-      ]
-    end
+    auth_links =
+      if current_user do
+        [
+          %{href: "#", label: current_user.email},
+          %{href: "/users/settings", label: "Settings"},
+          %{href: "/users/log_out", label: "Log out", method: :delete}
+        ]
+      else
+        [
+          %{href: "/users/register", label: "Register"},
+          %{href: "/users/log_in", label: "Log in"}
+        ]
+      end
 
     if current_user do
       public_links ++ authenticated_links ++ auth_links
