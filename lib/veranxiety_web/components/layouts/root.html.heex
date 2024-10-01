@@ -7,6 +7,14 @@
     <.live_title suffix=" · ">
       <%= "Veranxiety" %>
     </.live_title>
+    <script>
+      (function() {
+        var darkMode = localStorage.getItem('darkMode');
+        if (darkMode === 'true' || (!darkMode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js">
     </script>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
