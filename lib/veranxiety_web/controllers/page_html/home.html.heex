@@ -1,23 +1,45 @@
-<div class="flex flex-col min-h-screen" x-data="{ isOpen: false }">
-  <header class="bg-bg-secondary shadow-md">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-      <a class="flex items-center space-x-2" href="#">
-        <span class="text-2xl font-bold text-gray-800">Veranxiety</span>
+<div class="bg-gray-100" x-data="{ isOpen: false }">
+  <header class="veranxiety-header shadow-lg">
+    <div class="container mx-auto px-4 py-6 flex items-center justify-between">
+      <a class="flex items-center space-x-2 veranxiety-logo" href="#">
+        <span class="text-3xl font-extrabold text-white">Veranxiety</span>
       </a>
-      <nav class="hidden md:flex space-x-6">
-        <a class="text-text-secondary hover:text-blue transition-colors" href="#features">
+      <nav class="hidden md:flex space-x-8">
+        <a
+          class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold"
+          href="#features"
+        >
           Features
         </a>
-        <a class="text-text-secondary hover:text-blue transition-colors" href="#about">About</a>
-        <a class="text-text-secondary hover:text-blue transition-colors" href="#contact">
+        <a
+          class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold"
+          href="#about"
+        >
+          About
+        </a>
+        <a
+          class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold"
+          href="#contact"
+        >
           Contact
         </a>
+        <a
+          class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold"
+          href="/sessions"
+        >
+          Anxiety Training
+        </a>
+        <a
+          class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold"
+          href="/allergy_entries"
+        >
+          Allergy Tracking
+        </a>
       </nav>
-      <!-- Button to toggle mobile menu -->
-      <button @click="isOpen = !isOpen" class="md:hidden">
+      <button @click="isOpen = !isOpen" class="md:hidden veranxiety-menu-button z-50">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6"
+          class="h-8 w-8 text-white"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -32,17 +54,47 @@
       </button>
     </div>
   </header>
-  <!-- Mobile Menu using Alpine.js -->
   <nav
     x-show="isOpen"
-    x-transition
-    x-bind:class="{'block': isOpen, 'hidden': !isOpen}"
-    class="md:hidden flex flex-col space-y-2 px-4 py-2 bg-bg-secondary"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 transform scale-90"
+    x-transition:enter-end="opacity-100 transform scale-100"
+    x-transition:leave="transition ease-in duration-300"
+    x-transition:leave-start="opacity-100 transform scale-100"
+    x-transition:leave-end="opacity-0 transform scale-90"
+    class="md:hidden fixed inset-0 bg-gray-800 bg-opacity-95 z-40 flex flex-col items-center justify-center"
     @click.outside="isOpen = false"
   >
-    <a class="text-text-secondary hover:text-blue transition-colors" href="#features">Features</a>
-    <a class="text-text-secondary hover:text-blue transition-colors" href="#about">About</a>
-    <a class="text-text-secondary hover:text-blue transition-colors" href="#contact">Contact</a>
+    <a
+      class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold text-2xl mb-6"
+      href="#features"
+    >
+      Features
+    </a>
+    <a
+      class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold text-2xl mb-6"
+      href="#about"
+    >
+      About
+    </a>
+    <a
+      class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold text-2xl mb-6"
+      href="#contact"
+    >
+      Contact
+    </a>
+    <a
+      class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold text-2xl mb-6"
+      href="/sessions"
+    >
+      Anxiety Training
+    </a>
+    <a
+      class="veranxiety-menu-item text-white hover:text-yellow-300 font-semibold text-2xl mb-6"
+      href="/allergy_entries"
+    >
+      Allergy Tracking
+    </a>
   </nav>
 
   <main class="flex-grow">

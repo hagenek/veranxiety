@@ -3,39 +3,63 @@
 @import "tailwindcss/utilities";
 @import "./theme.css"; /* This file is for your main application CSS */
 
-.veranxiety-dropdown {
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    pointer-events: none;
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
-.veranxiety-dropdown.active {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+
+.veranxiety-header {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
 }
-.veranxiety-mobile-menu {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+
+.veranxiety-logo {
+    transition: transform 0.3s ease;
 }
-.veranxiety-mobile-menu.active {
-    transform: translateX(0);
+
+.veranxiety-logo:hover {
+    transform: scale(1.1) rotate(5deg);
 }
+
 .veranxiety-menu-item {
     position: relative;
     overflow: hidden;
+    transition: color 0.3s ease;
 }
-.veranxiety-menu-item::after {
+
+.veranxiety-menu-item::before {
     content: '';
     position: absolute;
-    bottom: 0;
+    bottom: -2px;
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: currentColor;
-    transform: translateX(-101%);
+    background-color: #23a6d5;
+    transform: scaleX(0);
+    transform-origin: right;
     transition: transform 0.3s ease;
 }
-.veranxiety-menu-item:hover::after {
-    transform: translateX(0);
+
+.veranxiety-menu-item:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.veranxiety-mobile-menu {
+    transform: translateY(-100%);
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.veranxiety-mobile-menu.active {
+    transform: translateY(0);
+}
+
+.veranxiety-menu-button {
+    transition: transform 0.3s ease;
+}
+
+.veranxiety-menu-button:hover {
+    transform: rotate(90deg);
 }
