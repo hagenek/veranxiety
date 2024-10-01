@@ -1,7 +1,77 @@
 <div class="max-w-7xl mx-auto px-0 sm:px-4 lg:px-8">
   <div class="bg-base dark:bg-base shadow-xl rounded-lg overflow-hidden">
     <%= if @live_action in [:new, :edit] do %>
-      <!-- Existing form code for new/edit actions -->
+      <div class="px-4 py-5 sm:p-6">
+        <h1><%= if @live_action == :new, do: "New Session", else: "Edit Session" %></h1>
+        <.form
+          :let={f}
+          for={@changeset}
+          phx-submit="save"
+          phx-change="validate"
+          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <.input
+                field={f[:duration_minutes]}
+                type="number"
+                label="Duration (minutes)"
+                class="text-gray-900 dark:text-gray-100"
+              />
+              <.input
+                field={f[:duration_seconds]}
+                type="number"
+                label="Seconds"
+                min="0"
+                max="59"
+                class="text-gray-900 dark:text-gray-100"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Session Result
+              </label>
+              <div class="flex items-center space-x-4">
+                <label class="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="session[success]"
+                    value="true"
+                    class="form-radio text-indigo-600 dark:text-indigo-400"
+                    checked={@changeset.changes[:success] == true}
+                  />
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">Successful</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="session[success]"
+                    value="false"
+                    class="form-radio text-indigo-600 dark:text-indigo-400"
+                    checked={@changeset.changes[:success] == false}
+                  />
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">Not successful</span>
+                </label>
+              </div>
+            </div>
+            <div class="sm:col-span-2 lg:col-span-3">
+              <.input
+                field={f[:notes]}
+                type="textarea"
+                label="Notes"
+                rows="4"
+                class="text-gray-900 dark:text-gray-100"
+              />
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <.button class="dark:bg-surface-1 dark:text-peach" type="submit">
+              <%= if @live_action == :new, do: "Add Session", else: "Update Session" %>
+            </.button>
+          </div>
+        </.form>
+      </div>
     <% else %>
       <div class="px-4 py-5 sm:p-6">
         <div class="mb-6 flex justify-between items-center">
