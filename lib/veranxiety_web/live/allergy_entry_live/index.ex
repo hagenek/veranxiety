@@ -139,12 +139,7 @@ defmodule VeranxietyWeb.AllergyEntryLive do
     Allergy.list_allergy_entries(current_user)
   end
 
-  @impl true
-  def render(assigns) do
-    ~H"""
-    <!-- Your existing render code goes here -->
-    """
-  end
+
 
   defp itch_score_classes(score) do
     base_classes = "mt-2 px-3 py-1 w-fit text-xs font-semibold rounded-full"
@@ -340,21 +335,5 @@ defmodule VeranxietyWeb.AllergyEntryLive do
       </div>
     </div>
     """
-  end
-
-  defp itch_score_classes(score) do
-    base_classes = "mt-2 px-3 py-1 w-fit text-xs font-semibold rounded-full"
-
-    score_specific_classes =
-      case score do
-        0 -> "bg-green text-crust dark:bg-green dark:text-base"
-        1 -> "bg-yellow text-crust dark:bg-yellow dark:text-base"
-        2 -> "bg-peach text-crust dark:bg-peach dark:text-base"
-        3 -> "bg-red text-crust dark:bg-maroon dark:text-base"
-        4 -> "bg-mauve text-crust dark:bg-red dark:text-base"
-        _ -> "bg-surface0 text-text dark:bg-surface1 dark:text-text"
-      end
-
-    "#{base_classes} #{score_specific_classes}"
   end
 end

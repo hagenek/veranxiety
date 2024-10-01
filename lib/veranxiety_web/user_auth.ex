@@ -182,6 +182,16 @@ defmodule VeranxietyWeb.UserAuth do
     end)
   end
 
+  def assign_current_user(conn, _opts) do
+    if user = get_session(conn, :user_token) do
+      # Assuming `Accounts.get_user_by_session_token/1` returns the user from the token
+      user = Veranxiety.Accounts.get_user_by_session_token(user)
+      assign(conn, :current_user, user)
+    else
+      assign(conn, :current_user, nil)
+    end
+  end
+
   @doc """
   Used for routes that require the user to not be authenticated.
   """
