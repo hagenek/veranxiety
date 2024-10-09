@@ -40,7 +40,10 @@ defmodule VeranxietyWeb.AllergyEntryLive do
       |> Allergy.change_entry(entry_params)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign(socket, :changeset, changeset)}
+    {:noreply,
+     socket
+     |> assign(:changeset, changeset)
+     |> assign(:current_food, entry_params["current_food"] || socket.assigns.current_food)}
   end
 
   @impl true
@@ -219,6 +222,7 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                   type="text"
                   label="Current Food"
                   value={@current_food}
+                  phx-update="ignore"
                   class="mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-black focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
                 />
               </div>
