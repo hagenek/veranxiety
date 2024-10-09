@@ -45,7 +45,27 @@ defmodule Veranxiety.Allergy do
   end
 
   @doc """
-  Creates an entry associated with a user.
+  Gets the most recent entry for a specific user.
+
+  ## Examples
+
+      iex> get_most_recent_entry(user)
+      %Entry{}
+
+      iex> get_most_recent_entry(user)
+      nil
+
+  """
+  def get_most_recent_entry(%User{} = user) do
+    Entry
+    |> where(user_id: ^user.id)
+    |> order_by(desc: :inserted_at)
+    |> limit(1)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a new entry for a specific user.
 
   ## Examples
 
@@ -74,14 +94,10 @@ defmodule Veranxiety.Allergy do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_entry(%User{} = user, %Entry{} = entry, attrs) do
-    if entry.user_id == user.id do
-      entry
-      |> Entry.changeset(attrs)
-      |> Repo.update()
-    else
-      {:error, :unauthorized}
-    end
+  def update_entry(%User{} = _user, %Entry{} = entry, attrs) do
+    entry
+    |> Entry.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """

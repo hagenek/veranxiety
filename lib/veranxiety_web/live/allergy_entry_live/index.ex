@@ -8,13 +8,16 @@ defmodule VeranxietyWeb.AllergyEntryLive do
   @impl true
   def mount(_params, _session, socket) do
     current_user = socket.assigns.current_user
+    entries = list_entries(current_user)
+    most_recent_entry = Allergy.get_most_recent_entry(current_user)
 
     {:ok,
      socket
-     |> assign(:entries, list_entries(current_user))
+     |> assign(:entries, entries)
      |> assign(:itch_score, nil)
      |> assign(:symptoms, [])
-     |> assign(:current_user, current_user)}
+     |> assign(:current_user, current_user)
+     |> assign(:current_food, most_recent_entry && most_recent_entry.current_food)}
   end
 
   @impl true
@@ -45,7 +48,8 @@ defmodule VeranxietyWeb.AllergyEntryLive do
     updated_params =
       Map.merge(entry_params, %{
         "itch_score" => socket.assigns.itch_score,
-        "symptoms" => Enum.join(socket.assigns.symptoms, ", ")
+        "symptoms" => Enum.join(socket.assigns.symptoms, ", "),
+        "current_food" => entry_params["current_food"] || socket.assigns.current_food
       })
 
     save_entry(socket, socket.assigns.live_action, updated_params)
@@ -89,7 +93,8 @@ defmodule VeranxietyWeb.AllergyEntryLive do
 
   defp apply_action(socket, :new, _params) do
     today = Date.utc_today()
-    entry = %Entry{date: today}
+    # Add default empty string
+    entry = %Entry{date: today, current_food: socket.assigns.current_food || ""}
 
     socket
     |> assign(:page_title, "New Allergy Entry")
@@ -209,6 +214,16 @@ defmodule VeranxietyWeb.AllergyEntryLive do
               </div>
 
               <div>
+                <.input
+                  field={f[:current_food]}
+                  type="text"
+                  label="Current Food"
+                  value={@current_food}
+                  class="mt-2 block w-full rounded-lg text-zinc-900 dark:bg-base dark:text-black focus:ring-0 sm:text-sm sm:leading-6 border-zinc-300 focus:border-zinc-400"
+                />
+              </div>
+
+              <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-lavender mb-2">
                   Itch Score (required)
                 </label>
@@ -219,12 +234,12 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                       phx-click="set_itch_score"
                       phx-value-score={score}
                       class={"w-full px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 ease-in-out #{
-                    if @itch_score == score do
-                      "bg-mauve text-base dark:bg-blue dark:text-crust"
-                    else
-                      "bg-surface0 text-text hover:bg-surface1 dark:bg-surface1 dark:text-lavender dark:hover:bg-surface2"
-                    end
-                  } border border-surface1 dark:border-surface2"}
+    if @itch_score == score do
+    "bg-mauve text-base dark:bg-blue dark:text-crust"
+    else
+    "bg-surface0 text-text hover:bg-surface1 dark:bg-surface1 dark:text-lavender dark:hover:bg-surface2"
+    end
+    } border border-surface1 dark:border-surface2"}
                     >
                       <span class="capitalize"><%= label %> (<%= score %>)</span>
                     </button>
@@ -272,10 +287,10 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                   Cancel
                 </.button>
                 <.button class="transition-colors duration-200
-                   light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
-                   light:border-2 light:border-pink-300 light:hover:border-pink-400
-                   dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
-                   font-medium rounded-lg px-4 py-2 text-sm">
+    light:bg-fuchsia-400 light:hover:bg-fuchsia-500 light:text-purple-900
+    light:border-2 light:border-pink-300 light:hover:border-pink-400
+    dark:bg-[#89b4fa] dark:hover:bg-[#74c7ec] dark:text-[#1e1e2e]
+    font-medium rounded-lg px-4 py-2 text-sm">
                   <%= if @live_action == :new, do: "Add Entry", else: "Update Entry" %>
                 </.button>
               </div>
@@ -305,6 +320,9 @@ defmodule VeranxietyWeb.AllergyEntryLive do
                   </div>
                   <p class="text-sm text-gray-600 dark:text-gray-300">
                     <strong>Symptoms:</strong> <%= entry.symptoms || "None reported" %>
+                  </p>
+                  <p class="text-sm text-gray-600 dark:text-gray-300">
+                    <strong>Current Food:</strong> <%= entry.current_food || "Not specified" %>
                   </p>
                   <%= if entry.notes && entry.notes != "" do %>
                     <p class="text-sm text-gray-600 dark:text-gray-300">
