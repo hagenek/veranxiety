@@ -6,7 +6,7 @@ defmodule VeranxietyWeb.Components.BottomNav do
     ~H"""
     <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg z-50 md:hidden">
       <div class="flex justify-around items-center h-20">
-        <.nav_item route="/" icon="hero-home-solid" label="Dashboard" />
+        <.nav_item route="/schedule" icon="hero-calendar-solid" label="Dashboard" />
         <.nav_item route="/sessions" icon="hero-academic-cap-solid" label="Anxiety Training" />
         <.nav_item route="/allergy_entries" icon="hero-bug-ant-solid" label="Allergy Tracking" />
         <.nav_item route="/users/settings" icon="hero-cog-6-tooth-solid" label="Settings" />

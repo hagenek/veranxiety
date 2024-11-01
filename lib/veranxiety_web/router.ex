@@ -54,6 +54,8 @@ defmodule VeranxietyWeb.Router do
       live "/allergy_entries/new", AllergyEntryLive, :new
       live "/allergy_entries/:id/edit", AllergyEntryLive, :edit
 
+      live "/schedule", ScheduleLive, :index
+
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end
