@@ -15,6 +15,14 @@ To start your Phoenix server:
     -d postgres:17
 ```
 
+## Features to implement
+
+- [ ] Add grouping of training sessions.
+
+## Fixes needed
+
+- [ ] When clicking outside of checkbox not succesful, it is not chosen visually. (Arc browser)
+- [ ]
 ### Special for wsl2
 
 ```zsh
