@@ -1,3 +1,4 @@
+# sessions_live/index.ex
 defmodule VeranxietyWeb.SessionLive.Index do
   use VeranxietyWeb, :live_view
   alias Veranxiety.Training
@@ -11,21 +12,9 @@ defmodule VeranxietyWeb.SessionLive.Index do
      socket
      |> assign(:grouped_sessions, list_sessions(current_user))
      |> assign(:changeset, Training.change_session(%Session{}))
-     |> assign(:current_user, current_user)}
-  end
-
-  def get_duration_minutes(changeset) do
-    case Ecto.Changeset.get_field(changeset, :duration) do
-      nil -> ""
-      duration -> div(duration, 60)
-    end
-  end
-
-  def get_duration_seconds(changeset) do
-    case Ecto.Changeset.get_field(changeset, :duration) do
-      nil -> ""
-      duration -> rem(duration, 60)
-    end
+     |> assign(:current_user, current_user)
+     |> assign(:expanded_session_id, nil)
+     |> assign(:page_title, "Training Sessions")}
   end
 
   @impl true
@@ -50,6 +39,19 @@ defmodule VeranxietyWeb.SessionLive.Index do
     {:noreply, assign(socket, :grouped_sessions, list_sessions(socket.assigns.current_user))}
   end
 
+  def handle_event("toggle_session", %{"id" => session_id}, socket) do
+    current_expanded = socket.assigns.expanded_session_id
+    # Convert the incoming ID to integer
+    session_id = String.to_integer(session_id)
+    new_expanded = if current_expanded == session_id, do: nil, else: session_id
+
+    {:noreply, assign(socket, :expanded_session_id, new_expanded)}
+  end
+
+  def handle_event("refresh_session", %{"id" => _id}, socket) do
+    {:noreply, socket}
+  end
+
   @impl true
   def handle_event("save", %{"session" => session_params}, socket) do
     case create_or_update_session(socket, session_params) do
@@ -65,11 +67,6 @@ defmodule VeranxietyWeb.SessionLive.Index do
     end
   end
 
-  @impl true
-  def handle_event("navigate_back", _params, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/sessions")}
-  end
-
   defp apply_action(socket, :edit, %{"id" => id}) do
     session = Training.get_session!(socket.assigns.current_user, id)
 
@@ -77,6 +74,8 @@ defmodule VeranxietyWeb.SessionLive.Index do
     |> assign(:page_title, "Edit Session")
     |> assign(:session, session)
     |> assign(:changeset, Training.change_session(session))
+    # Close expanded view when editing
+    |> assign(:expanded_session_id, nil)
   end
 
   defp apply_action(socket, :new, _params) do
@@ -84,11 +83,13 @@ defmodule VeranxietyWeb.SessionLive.Index do
     |> assign(:page_title, "New Session")
     |> assign(:session, %Session{})
     |> assign(:changeset, Training.change_session(%Session{}))
+    # Close expanded view when creating new
+    |> assign(:expanded_session_id, nil)
   end
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Sessions")
+    |> assign(:page_title, "Training Sessions")
     |> assign(:session, nil)
     |> assign(:changeset, Training.change_session(%Session{}))
   end

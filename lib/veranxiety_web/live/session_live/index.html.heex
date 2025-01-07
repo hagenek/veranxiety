@@ -1,8 +1,12 @@
 <div class="max-w-7xl mx-auto px-0 sm:px-4 lg:px-8">
-  <div class="bg-white dark:bg-base shadow-xl rounded-lg overflow-hidden">
+  <div class="bg-bg-primary border-bg-secondary border rounded-lg overflow-hidden">
     <%= if @live_action in [:new, :edit] do %>
       <div class="px-4 py-5 sm:p-6">
-        <h1 class="text-xl font-semibold mb-6">
+        <h1 class="text-xl font-semibold mb-6 text-text flex items-center">
+          <.icon
+            name={if @live_action == :new, do: "hero-plus-circle", else: "hero-pencil-square"}
+            class="w-6 h-6 mr-2"
+          />
           <%= if @live_action == :new, do: "New Session", else: "Edit Session" %>
         </h1>
         <.form
@@ -10,7 +14,7 @@
           for={@changeset}
           phx-submit="save"
           phx-change="validate"
-          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+          class="bg-bg-primary p-6 rounded-lg"
         >
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div>
@@ -18,7 +22,7 @@
                 field={f[:duration_minutes]}
                 type="number"
                 label="Duration (minutes)"
-                class="text-gray-900 dark:text-gray-100"
+                class="text-text"
               />
               <.input
                 field={f[:duration_seconds]}
@@ -26,11 +30,11 @@
                 label="Seconds"
                 min="0"
                 max="59"
-                class="text-gray-900 dark:text-gray-100"
+                class="text-text"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-sm font-medium text-subtext0 mb-2">
                 Session Result
               </label>
               <div class="flex items-center space-x-4">
@@ -39,110 +43,279 @@
                     type="radio"
                     name="session[success]"
                     value="true"
-                    class="form-radio text-indigo-600 dark:text-indigo-400"
+                    class="form-radio text-green"
                     checked={@changeset.changes[:success] == true}
                   />
-                  <span class="ml-2 text-gray-700 dark:text-gray-300">Successful</span>
+                  <span class="ml-2 text-subtext1">Successful</span>
                 </label>
                 <label class="inline-flex items-center">
                   <input
                     type="radio"
                     name="session[success]"
                     value="false"
-                    class="form-radio text-indigo-600 dark:text-indigo-400"
+                    class="form-radio text-red"
                     checked={@changeset.changes[:success] == false}
                   />
-                  <span class="ml-2 text-gray-700 dark:text-gray-300">Not successful</span>
+                  <span class="ml-2 text-subtext1">Not successful</span>
                 </label>
               </div>
             </div>
             <div class="sm:col-span-2 lg:col-span-3">
-              <.input
-                field={f[:notes]}
-                type="textarea"
-                label="Notes"
-                rows="4"
-                class="text-gray-900 dark:text-gray-100"
-              />
+              <.input field={f[:notes]} type="textarea" label="Notes" rows="4" class="text-text" />
             </div>
           </div>
 
           <div class="mt-6 flex justify-end space-x-3">
-            <.link patch={~p"/sessions"} class="dark:text-peach">
-              Cancel
+            <.link
+              patch={~p"/sessions"}
+              class="flex items-center px-4 py-2 rounded-md hover:bg-bg-secondary text-peach"
+            >
+              <.icon name="hero-x-mark" class="w-4 h-4 mr-2" /> Cancel
             </.link>
-            <.button class="dark:bg-surface-1 dark:text-peach" type="submit">
+            <.button class="bg-blue hover:opacity-90 text-white flex items-center" type="submit">
+              <.icon
+                name={if @live_action == :new, do: "hero-plus", else: "hero-check"}
+                class="w-4 h-4 mr-2"
+              />
               <%= if @live_action == :new, do: "Add Session", else: "Update Session" %>
             </.button>
           </div>
         </.form>
       </div>
     <% else %>
-      <div class="px-4 py-5 sm:p-6">
+      <div class="p-4">
         <div class="mb-6 flex justify-between items-center">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Training Sessions</h3>
+          <h3 class="text-xl font-medium text-text flex items-center">
+            <.icon name="hero-clock" class="w-6 h-6 mr-2" /> Training Sessions
+          </h3>
           <.link patch={~p"/sessions/new"}>
-            <.button class="dark:bg-mauve dark:text-black">
-              <span>New Session</span>
-              <.icon name="hero-plus-circle-mini" class="ml-2 h-5 w-5" />
+            <.button class="bg-blue dark:bg-mauve hover:bg-blue/90 text-white dark:text-black text-base flex items-center px-4 py-2 rounded-lg">
+              <.icon name="hero-plus" class="w-5 h-5 mr-2" />
+              <span class="dark:text-gray-800">New Session</span>
             </.button>
           </.link>
         </div>
 
-        <div class="space-y-8">
+        <div class="space-y-6">
           <%= for {{date, window}, sessions} <- @grouped_sessions do %>
-            <div class="bg-gray-50 dark:bg-surface0 rounded-lg p-4">
+            <div class="bg-bg-secondary rounded-lg p-4">
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    <%= date %>
+                  <h4 class="text-lg font-semibold text-text flex items-center">
+                    <.icon name="hero-calendar" class="w-6 h-6 mr-2 text-overlay1" />
+                    <%= Calendar.strftime(Date.from_iso8601!(date), "%B %d, %Y") %>
                   </h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+
+                  <p class="text-base text-subtext1 dark:text-gray-200 flex items-center mt-1">
+                    <.icon name="hero-clock" class="w-5 h-5 mr-2" />
                     <%= format_window_time(window) %> · <%= length(sessions) %> sessions
                   </p>
                 </div>
               </div>
 
-              <div class="space-y-3">
+              <div class="space-y-4">
                 <%= for session <- sessions do %>
-                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-4">
-                        <div class={[
-                          "px-3 py-1 rounded-full text-sm font-medium",
-                          session.success && "bg-green text-crust dark:bg-green dark:text-base",
-                          !session.success && "bg-red text-crust dark:bg-maroon dark:text-base"
-                        ]}>
-                          <%= if session.success, do: "Success", else: "Not successful" %>
-                        </div>
-                        <div>
-                          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            <%= format_duration(session.duration) %>
-                          </p>
-                          <%= if session.notes && session.notes != "" do %>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                              <%= session.notes %>
-                            </p>
-                          <% end %>
-                        </div>
-                      </div>
-                      <div class="flex space-x-2">
-                        <.link
-                          patch={~p"/sessions/#{session.id}/edit"}
-                          class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                        >
-                          <.icon name="hero-pencil-square-mini" class="h-5 w-5" />
-                        </.link>
-                        <.link
-                          phx-click="delete"
+                  <div id={"session-#{session.id}"} class="relative">
+                    <%= if @expanded_session_id == session.id do %>
+                      <div class="absolute left-0 right-0 z-50">
+                        <div
+                          class="fixed inset-0 bg-crust"
+                          phx-click="toggle_session"
                           phx-value-id={session.id}
-                          data-confirm="Are you sure?"
-                          class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         >
-                          <.icon name="hero-trash-mini" class="h-5 w-5" />
-                        </.link>
+                        </div>
+                        <div class="fixed inset-0 sm:inset-4 bg-bg-primary rounded-none sm:rounded-xl overflow-hidden">
+                          <!-- Header -->
+                          <div class="sticky top-0 z-10 bg-bg-primary border-b border-bg-secondary px-4 py-3 flex items-center">
+                            <button
+                              phx-click="toggle_session"
+                              phx-value-id={session.id}
+                              class="p-2 -ml-2 rounded-full hover:bg-bg-secondary text-overlay1"
+                            >
+                              <.icon name="hero-arrow-left" class="w-6 h-6" />
+                            </button>
+                            <h3 class="ml-2 text-lg font-medium text-text">Session Details</h3>
+                          </div>
+                          <!-- Content area with proper padding and scroll -->
+                          <div class="h-[calc(100%-60px)] overflow-y-auto pb-32">
+                            <div class="p-6 space-y-8">
+                              <!-- Status badge and time -->
+                              <div class="flex justify-between items-center">
+                                <div class={[
+                                  "px-4 py-2 rounded-full text-base font-medium flex items-center whitespace-nowrap",
+                                  session.success && "bg-green/20 text-green",
+                                  !session.success && "bg-red/20 text-red"
+                                ]}>
+                                  <.icon
+                                    name={
+                                      if session.success,
+                                        do: "hero-check-circle",
+                                        else: "hero-x-circle"
+                                    }
+                                    class="w-5 h-5 mr-2"
+                                  />
+                                  <%= if session.success, do: "Success", else: "Not successful" %>
+                                </div>
+                                <p class="text-lg font-medium text-text">
+                                  <%= format_duration(session.duration) %>
+                                </p>
+                              </div>
+                              <!-- Time details with timeline -->
+                              <div class="bg-bg-secondary rounded-xl">
+                                <h5 class="text-lg font-medium text-text mb-4">Time Details</h5>
+                                <!-- Timeline bar -->
+                                <% max_duration = 30 * 60 %>
+                                <% min_width = 15 %>
+                                <% width =
+                                  min(100, max(min_width, session.duration / max_duration * 100)) %>
+
+                                <div class="mb-6">
+                                  <div class="h-3 bg-bg-primary rounded-full w-full">
+                                    <div
+                                      class={[
+                                        "h-full rounded-full transition-all duration-500",
+                                        session.success && "bg-green",
+                                        !session.success && "bg-red"
+                                      ]}
+                                      style={"width: #{width}%"}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div class="space-y-6">
+                                  <div class="grid grid-cols-2 gap-6">
+                                    <!-- Start time -->
+                                    <div>
+                                      <p class="text-base text-overlay1 dark:text-gray-200">
+                                        Started
+                                      </p>
+                                      <p class="text-lg font-medium text-text dark:text-gray-200 mt-1">
+                                        <% start_time =
+                                          NaiveDateTime.add(
+                                            session.inserted_at,
+                                            -session.duration,
+                                            :second
+                                          ) %>
+                                        <%= Calendar.strftime(start_time, "%H:%M:%S") %>
+                                      </p>
+                                    </div>
+                                    <!-- End time -->
+                                    <div>
+                                      <p class="text-base text-overlay1 dark:text-gray-200">
+                                        Ended
+                                      </p>
+                                      <p class="text-lg font-medium text-text mt-1">
+                                        <%= Calendar.strftime(session.inserted_at, "%H:%M:%S") %>
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <!-- Duration -->
+                                  <div>
+                                    <p class="text-base text-overlay1 dark:text-gray-200">
+                                      Duration
+                                    </p>
+                                    <p class="text-lg font-medium text-text mt-1">
+                                      <%= format_duration(session.duration) %>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- Notes section -->
+                              <div class="bg-bg-secondary rounded-xl p-2">
+                                <div class="flex items-center justify-between mb-4">
+                                  <h5 class="text-lg font-medium text-text">Notes</h5>
+                                  <%= if !session.notes do %>
+                                    <button class="text-blue hover:text-blue/80" disabled>
+                                      <.icon name="hero-plus-circle" class="w-5 h-5" />
+                                    </button>
+                                  <% end %>
+                                </div>
+                                <div class="min-h-[5em] bg-gray-200 dark:bg-gray-800 p-4 rounded-lg shadow-inner">
+                                  <%= if session.notes && session.notes != "" do %>
+                                    <p class="text-base text-text"><%= session.notes %></p>
+                                  <% else %>
+                                    <p class="text-base text-overlay1 italic">
+                                      No notes added yet
+                                    </p>
+                                  <% end %>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Bottom actions -->
+                          <div class="fixed bottom-0 inset-x-0 p-4 bg-bg-primary border-t border-bg-secondary">
+                            <div class="flex space-x-4 max-w-lg mx-auto">
+                              <.link
+                                patch={~p"/sessions/#{session.id}/edit"}
+                                class="flex-1 flex items-center justify-center px-6 py-3 rounded-lg bg-blue/10 text-blue hover:bg-blue/20 text-base font-medium"
+                              >
+                                <.icon name="hero-pencil-square" class="w-5 h-5 mr-2" /> Edit
+                              </.link>
+                              <.link
+                                phx-click="delete"
+                                phx-value-id={session.id}
+                                data-confirm="Are you sure?"
+                                class="flex-1 flex items-center justify-center px-6 py-3 rounded-lg bg-red/10 text-red hover:bg-red/20 text-base font-medium"
+                              >
+                                <.icon name="hero-trash" class="w-5 h-5 mr-2" /> Delete
+                              </.link>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    <% else %>
+                      <!-- Collapsed view -->
+                      <div class="bg-bg-primary border border-bg-secondary rounded-lg p-4 hover:bg-bg-secondary/50 transition-colors">
+                        <div class="flex items-center justify-between">
+                          <div class="flex flex-wrap items-center gap-3">
+                            <div class={[
+                              "px-3 py-1 rounded-full text-sm font-medium flex items-center whitespace-nowrap",
+                              session.success && "bg-green/20 text-green",
+                              !session.success && "bg-red/20 text-red"
+                            ]}>
+                              <.icon
+                                name={
+                                  if session.success,
+                                    do: "hero-check-circle",
+                                    else: "hero-x-circle"
+                                }
+                                class="w-4 h-4 mr-1.5"
+                              />
+                              <%= if session.success, do: "Success", else: "Not successful" %>
+                            </div>
+                            <p class="text-base font-medium text-text whitespace-nowrap">
+                              <%= format_duration(session.duration) %>
+                            </p>
+                          </div>
+
+                          <div class="flex items-center">
+                            <div class="flex -space-x-1">
+                              <.link
+                                patch={~p"/sessions/#{session.id}/edit"}
+                                class="relative p-2 rounded-lg hover:bg-bg-secondary text-blue z-20"
+                              >
+                                <.icon name="hero-pencil-square" class="w-5 h-5" />
+                              </.link>
+                              <.link
+                                phx-click="delete"
+                                phx-value-id={session.id}
+                                data-confirm="Are you sure?"
+                                class="relative p-2 rounded-lg hover:bg-bg-secondary text-red z-10"
+                              >
+                                <.icon name="hero-trash" class="w-5 h-5" />
+                              </.link>
+                              <button
+                                phx-click="toggle_session"
+                                phx-value-id={session.id}
+                                class="relative p-2 rounded-lg hover:bg-bg-secondary text-overlay1"
+                              >
+                                <.icon name="hero-chevron-right" class="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
                   </div>
                 <% end %>
               </div>

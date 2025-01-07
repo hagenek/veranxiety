@@ -5,11 +5,16 @@
 @import "./alpine.css";
 @import "./nativelike.css";
 
-
 @keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .veranxiety-header {
@@ -33,7 +38,7 @@
 }
 
 .veranxiety-menu-item::before {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -2px;
     left: 0;
@@ -73,4 +78,36 @@
 
 #menu-icon.transform.rotate-0 {
     transform: rotate(0deg);
+}
+
+/* In your CSS */
+.session-content {
+    transition: all 0.3s ease-in-out;
+}
+
+.session-content[data-expanded="true"] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.session-content[data-expanded="false"] {
+    opacity: 0.95;
+    transform: translateY(0);
+}
+
+[id^="session-content-"] {
+    transition: all 0.3s ease-in-out;
+}
+
+.fixed {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.fixed[data-expanded="true"] {
+    opacity: 1;
+}
+
+.fixed[data-expanded="false"] {
+    opacity: 0;
+    pointer-events: none;
 }

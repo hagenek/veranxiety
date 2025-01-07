@@ -24,7 +24,21 @@ import topbar from "../vendor/topbar";
 import DarkMode from "./hooks/dark_mode";
 
 let Hooks = {};
+
+const SessionExpansion = {
+  mounted() {
+    console.log("Session expansion hook mounted", this.el.id);
+    this.handleEvent("session_updated", ({ id }) => {
+      if (this.el.id === `session-${id}`) {
+        // Force a DOM update
+        this.pushEvent("refresh_session", { id });
+      }
+    });
+  },
+};
+
 Hooks.DarkMode = DarkMode;
+Hooks.SessionExpansion = SessionExpansion;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
