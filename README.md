@@ -2,27 +2,33 @@
 
 To start your Phoenix server:
 
-- Setupa a database with e.g. docker
+- Setup a database with e.g. docker
 
 ```zsh
-  Docker command for PostgreSQL 16 setup
+  Docker command for PostgreSQL 17 setup
 
   docker run --name veranxiety-postgres \
     -e POSTGRES_USER=postgres \
     -e POSTGRES_PASSWORD=postgres \
     -e POSTGRES_DB=veranxiety_dev \
-    -p 5432:5432 \
+    -p 5432:5435 \
     -d postgres:17
 ```
 
 ## Features to implement
 
+### Grouping, view logic
 - [ ] Add grouping of training sessions.
+
+### Data shown is from "dog" not tied to user
+
+- [ ] Scope this.
 
 ## Fixes needed
 
 - [ ] When clicking outside of checkbox not succesful, it is not chosen visually. (Arc browser)
 - [ ]
+
 ### Special for wsl2
 
 ```zsh
@@ -34,17 +40,4 @@ To start your Phoenix server:
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## TODOs
-
-- [ ] Make sure the app works as expected and that navigation is possible
-  - [ ] Add a link to the homepage
-
-## Learn more
-
-- Official website: https://www.phoenixframework.org/
-- Guides: https://hexdocs.pm/phoenix/overview.html
-- Docs: https://hexdocs.pm/phoenix
-- Forum: https://elixirforum.com/c/phoenix-forum
-- Source: https://github.com/phoenixframework/phoenix
+deployed at https://veranxiety.fly.dev
