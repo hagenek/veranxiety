@@ -17,6 +17,12 @@ To start your Phoenix server:
 
 ## Features to implement
 
+### Add options for inserting
+
+- [ ] Boxes for what room dog is in.
+- [ ] Listening to podcast or music in background?
+- [ ] Activity before leaving dog.
+
 ### Grouping, view logic
 - [ ] Add grouping of training sessions.
 
