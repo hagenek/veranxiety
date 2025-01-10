@@ -112,7 +112,6 @@ defmodule VeranxietyWeb.SessionLive.Index do
       {Date.to_string(date), window_start}
     end)
     |> Enum.sort_by(fn {{date, _window}, _sessions} -> date end, :desc)
-    # Convert back to a map after sorting
     |> Map.new()
   end
 
