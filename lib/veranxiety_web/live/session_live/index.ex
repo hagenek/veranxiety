@@ -111,7 +111,14 @@ defmodule VeranxietyWeb.SessionLive.Index do
       date = NaiveDateTime.to_date(datetime)
       {Date.to_string(date), window_start}
     end)
-    |> Enum.sort_by(fn {{date, _window}, _sessions} -> date end, :desc)
+    |> Enum.sort_by(
+      fn {{date, _window}, _sessions} ->
+        # Convert the date string back to a Date for proper chronological sorting
+        {:ok, parsed_date} = Date.from_iso8601(date)
+        Date.to_erl(parsed_date)
+      end,
+      :desc
+    )
     |> Map.new()
   end
 
