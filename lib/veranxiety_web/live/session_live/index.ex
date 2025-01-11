@@ -101,25 +101,27 @@ defmodule VeranxietyWeb.SessionLive.Index do
   end
 
   defp group_sessions_by_time_window(sessions) do
-    sessions
-    |> Enum.sort_by(& &1.inserted_at, :desc)
-    |> Enum.group_by(fn session ->
-      datetime = session.inserted_at
-      # Round down to the nearest even hour to create 2-hour windows
-      hour = datetime.hour
-      window_start = hour - rem(hour, 2)
-      date = NaiveDateTime.to_date(datetime)
-      {Date.to_string(date), window_start}
-    end)
-    |> Enum.sort_by(
-      fn {{date, _window}, _sessions} ->
-        # Convert the date string back to a Date for proper chronological sorting
-        {:ok, parsed_date} = Date.from_iso8601(date)
-        Date.to_erl(parsed_date)
-      end,
-      :desc
-    )
-    |> Map.new()
+    result =
+      sessions
+      |> Enum.sort_by(& &1.inserted_at, :desc)
+      |> Enum.group_by(fn session ->
+        datetime = session.inserted_at
+        hour = datetime.hour
+        window_start = hour - rem(hour, 2)
+        date = NaiveDateTime.to_date(datetime)
+        {Date.to_string(date), window_start}
+      end)
+      |> Enum.sort_by(
+        fn {{date, window}, _sessions} ->
+          {:ok, parsed_date} = Date.from_iso8601(date)
+          # Use negative window for desc order
+          {Date.to_gregorian_days(parsed_date), -window}
+        end,
+        :desc
+      )
+
+    IO.inspect(result, label: "Grouped and sorted sessions structure")
+    result |> Map.new()
   end
 
   defp create_or_update_session(socket, session_params) do
