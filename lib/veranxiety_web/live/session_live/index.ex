@@ -114,8 +114,11 @@ defmodule VeranxietyWeb.SessionLive.Index do
       |> Enum.sort_by(
         fn {{date, window}, _sessions} ->
           {:ok, parsed_date} = Date.from_iso8601(date)
-          # Use negative window for desc order
-          {Date.to_gregorian_days(parsed_date), -window}
+
+          epoch_ms =
+            DateTime.to_unix(DateTime.new!(parsed_date, ~T[00:00:00], "Etc/UTC"), :millisecond)
+
+          {epoch_ms, -window}
         end,
         :desc
       )
