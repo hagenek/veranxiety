@@ -97,7 +97,7 @@
         </div>
 
         <div class="space-y-6">
-          <%= for {{date, window}, sessions} <- Enum.reverse(@grouped_sessions) do %>
+          <%= for {{date, window}, sessions} <- @grouped_sessions do %>
             <div class="bg-bg-secondary rounded-lg p-4">
               <div class="flex items-center justify-between mb-4">
                 <div>

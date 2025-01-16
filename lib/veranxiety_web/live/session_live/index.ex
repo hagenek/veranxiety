@@ -108,18 +108,16 @@ defmodule VeranxietyWeb.SessionLive.Index do
       hour = datetime.hour
       window_start = hour - rem(hour, 2)
       date = NaiveDateTime.to_date(datetime)
-      # Keep as Date struct, don't convert to string
       {date, window_start}
     end)
     |> Enum.sort_by(fn {{date, window}, _sessions} ->
-      # Sort by date descending, then by window descending
       {Date.to_gregorian_days(date) * -1, window * -1}
     end)
     |> Enum.map(fn {{date, window}, sessions} ->
-      # Convert date to string only for the final output
       {{Date.to_string(date), window}, sessions}
     end)
-    |> Map.new()
+
+    # Remove the Map.new() call to preserve order
   end
 
   defp create_or_update_session(socket, session_params) do
