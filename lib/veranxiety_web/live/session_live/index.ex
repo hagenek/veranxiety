@@ -101,30 +101,25 @@ defmodule VeranxietyWeb.SessionLive.Index do
   end
 
   defp group_sessions_by_time_window(sessions) do
-    result =
-      sessions
-      |> Enum.sort_by(& &1.inserted_at, :desc)
-      |> Enum.group_by(fn session ->
-        datetime = session.inserted_at
-        hour = datetime.hour
-        window_start = hour - rem(hour, 2)
-        date = NaiveDateTime.to_date(datetime)
-        {Date.to_string(date), window_start}
-      end)
-      |> Enum.sort_by(
-        fn {{date, window}, _sessions} ->
-          {:ok, parsed_date} = Date.from_iso8601(date)
-
-          epoch_ms =
-            DateTime.to_unix(DateTime.new!(parsed_date, ~T[00:00:00], "Etc/UTC"), :millisecond)
-
-          {epoch_ms, -window}
-        end,
-        :desc
-      )
-
-    IO.inspect(result, label: "Grouped and sorted sessions structure")
-    result |> Map.new()
+    sessions
+    |> Enum.sort_by(& &1.inserted_at, :desc)
+    |> Enum.group_by(fn session ->
+      datetime = session.inserted_at
+      hour = datetime.hour
+      window_start = hour - rem(hour, 2)
+      date = NaiveDateTime.to_date(datetime)
+      # Keep as Date struct, don't convert to string
+      {date, window_start}
+    end)
+    |> Enum.sort_by(fn {{date, window}, _sessions} ->
+      # Sort by date descending, then by window descending
+      {Date.to_gregorian_days(date) * -1, window * -1}
+    end)
+    |> Enum.map(fn {{date, window}, sessions} ->
+      # Convert date to string only for the final output
+      {{Date.to_string(date), window}, sessions}
+    end)
+    |> Map.new()
   end
 
   defp create_or_update_session(socket, session_params) do
